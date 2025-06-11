@@ -313,7 +313,7 @@ function doran_survey_display_form_shortcode() {
         </div>
 
         <div id="questions-for-1" class="question-set" style="display:none;">
-            <h4>Pertanyaan Khusus Toko Offline</h4>
+            <h4>Pertanyaan Khusus Store Offline</h4>
 
             <!--  Offline Q1  -->
             <div class="form-group">
@@ -728,7 +728,7 @@ function doran_survey_display_form_shortcode() {
         </div>
 
         <div id="questions-for-2" class="question-set" style="display:none;">
-            <h4>Pertanyaan Khusus Belanja Online</h4>
+            <h4>Pertanyaan Khusus Website / Aplikasi Doran Gadget</h4>
             <!--  online Q1  -->
             <div class="form-group">
                 <label>1. Seberapa cepat website/aplikasi Doran Gadget dalam memuat halaman atau produk yang Anda
@@ -741,6 +741,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">1</span>
                         <span class="rating-text">Sangat Tidak Sesuai</span>
                     </label>
+                    <input type="hidden" name="survey_data[online][0][opsi][1]" value="Sangat Tidak Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[online][0][jawab]" value="2" class="survey-input"
@@ -748,6 +749,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">2</span>
 
                     </label>
+                    <input type="hidden" name="survey_data[online][0][opsi][2]" value="Tidak Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[online][0][jawab]" value="3" class="survey-input"
@@ -755,6 +757,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">3</span>
 
                     </label>
+                    <input type="hidden" name="survey_data[online][0][opsi][3]" value="Cukup Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[online][0][jawab]" value="4" class="survey-input"
@@ -762,6 +765,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">4</span>
 
                     </label>
+                    <input type="hidden" name="survey_data[online][0][opsi][4]" value="Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[online][0][jawab]" value="5" class="survey-input"
@@ -769,6 +773,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">5</span>
                         <span class="rating-text">Sangat Sesuai</span>
                     </label>
+                    <input type="hidden" name="survey_data[online][0][opsi][5]" value="Sangat Sesuai">
 
                 </div>
                 <input type="hidden" name="survey_data[online][0][soal]"
@@ -787,6 +792,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">1</span>
                         <span class="rating-text">Sangat Tidak Sesuai</span>
                     </label>
+                    <input type="hidden" name="survey_data[online][1][opsi][1]" value="Sangat Tidak Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[online][1][jawab]" value="2" class="survey-input"
@@ -794,6 +800,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">2</span>
 
                     </label>
+                    <input type="hidden" name="survey_data[online][1][opsi][2]" value="Tidak Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[online][1][jawab]" value="3" class="survey-input"
@@ -801,6 +808,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">3</span>
 
                     </label>
+                    <input type="hidden" name="survey_data[online][1][opsi][3]" value="Cukup Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[online][1][jawab]" value="4" class="survey-input"
@@ -808,6 +816,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">4</span>
 
                     </label>
+                    <input type="hidden" name="survey_data[online][1][opsi][4]" value="Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[online][1][jawab]" value="5" class="survey-input"
@@ -815,6 +824,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">5</span>
                         <span class="rating-text">Sangat Sesuai</span>
                     </label>
+                    <input type="hidden" name="survey_data[online][1][opsi][5]" value="Sangat Sesuai">
 
                 </div>
                 <input type="hidden" name="survey_data[online][1][soal]"
@@ -834,6 +844,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">1</span>
                         <span class="rating-text">Sangat Tidak Sesuai</span>
                     </label>
+                    <input type="hidden" name="survey_data[online][2][opsi][1]" value="Sangat Tidak Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[online][2][jawab]" value="2" class="survey-input"
@@ -841,6 +852,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">2</span>
 
                     </label>
+                    <input type="hidden" name="survey_data[online][2][opsi][2]" value="Tidak Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[online][2][jawab]" value="3" class="survey-input"
@@ -848,6 +860,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">3</span>
 
                     </label>
+                    <input type="hidden" name="survey_data[online][2][opsi][3]" value="Cukup Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[online][2][jawab]" value="4" class="survey-input"
@@ -855,6 +868,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">4</span>
 
                     </label>
+                    <input type="hidden" name="survey_data[online][2][opsi][4]" value="Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[online][2][jawab]" value="5" class="survey-input"
@@ -862,6 +876,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">5</span>
                         <span class="rating-text">Sangat Sesuai</span>
                     </label>
+                    <input type="hidden" name="survey_data[online][2][opsi][5]" value="Sangat Sesuai">
 
                 </div>
                 <input type="hidden" name="survey_data[online][2][soal]"
@@ -881,6 +896,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">1</span>
                         <span class="rating-text">Sangat Tidak Sesuai</span>
                     </label>
+                    <input type="hidden" name="survey_data[online][3][opsi][1]" value="Sangat Tidak Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[online][3][jawab]" value="2" class="survey-input"
@@ -888,6 +904,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">2</span>
 
                     </label>
+                    <input type="hidden" name="survey_data[online][3][opsi][2]" value="Tidak Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[online][3][jawab]" value="3" class="survey-input"
@@ -895,6 +912,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">3</span>
 
                     </label>
+                    <input type="hidden" name="survey_data[online][3][opsi][3]" value="Cukup Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[online][3][jawab]" value="4" class="survey-input"
@@ -902,6 +920,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">4</span>
 
                     </label>
+                    <input type="hidden" name="survey_data[online][3][opsi][4]" value="Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[online][3][jawab]" value="5" class="survey-input"
@@ -909,6 +928,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">5</span>
                         <span class="rating-text">Sangat Sesuai</span>
                     </label>
+                    <input type="hidden" name="survey_data[online][3][opsi][5]" value="Sangat Sesuai">
 
                 </div>
                 <input type="hidden" name="survey_data[online][3][soal]"
@@ -930,6 +950,7 @@ function doran_survey_display_form_shortcode() {
                         </span>
                         <span class="rating-text">Sangat Tidak Sesuai</span>
                     </label>
+                    <input type="hidden" name="survey_data[online][4][opsi][1]" value="Sangat Tidak Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[online][4][jawab]" value="2" class="survey-input"
@@ -940,6 +961,7 @@ function doran_survey_display_form_shortcode() {
                         </span>
 
                     </label>
+                    <input type="hidden" name="survey_data[online][4][opsi][2]" value="Tidak Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[online][4][jawab]" value="3" class="survey-input"
@@ -949,6 +971,7 @@ function doran_survey_display_form_shortcode() {
                                 height="32"></span>
 
                     </label>
+                    <input type="hidden" name="survey_data[online][4][opsi][3]" value="Cukup Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[online][4][jawab]" value="4" class="survey-input"
@@ -959,6 +982,7 @@ function doran_survey_display_form_shortcode() {
                         </span>
 
                     </label>
+                    <input type="hidden" name="survey_data[online][4][opsi][4]" value="Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[online][4][jawab]" value="5" class="survey-input"
@@ -969,6 +993,7 @@ function doran_survey_display_form_shortcode() {
                         </span>
                         <span class="rating-text">Sangat Sesuai</span>
                     </label>
+                    <input type="hidden" name="survey_data[online][4][opsi][5]" value="Sesuai">
 
                 </div>
                 <input type="hidden" name="survey_data[online][4][soal]"
@@ -988,6 +1013,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">1</span>
                         <span class="rating-text">Sangat Tidak Sesuai</span>
                     </label>
+                    <input type="hidden" name="survey_data[online][5][opsi][1]" value="Sangat Tidak Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[online][5][jawab]" value="2" class="survey-input"
@@ -995,6 +1021,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">2</span>
 
                     </label>
+                    <input type="hidden" name="survey_data[online][5][opsi][2]" value="Tidak Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[online][5][jawab]" value="3" class="survey-input"
@@ -1002,6 +1029,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">3</span>
 
                     </label>
+                    <input type="hidden" name="survey_data[online][5][opsi][3]" value="Cukup Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[online][5][jawab]" value="4" class="survey-input"
@@ -1009,6 +1037,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">4</span>
 
                     </label>
+                    <input type="hidden" name="survey_data[online][5][opsi][4]" value="Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[online][5][jawab]" value="5" class="survey-input"
@@ -1016,6 +1045,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">5</span>
                         <span class="rating-text">Sangat Sesuai</span>
                     </label>
+                    <input type="hidden" name="survey_data[online][5][opsi][5]" value="Sangat Sesuai">
 
                 </div>
                 <input type="hidden" name="survey_data[online][5][soal]"
@@ -1048,6 +1078,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">1</span>
                         <span class="rating-text">Sangat Tidak Sesuai</span>
                     </label>
+                    <input type="hidden" name="survey_data[marketplace][0][opsi][1]" value="Sangat Tidak Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[marketplace][0][jawab]" value="2" class="survey-input"
@@ -1055,6 +1086,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">2</span>
 
                     </label>
+                    <input type="hidden" name="survey_data[marketplace][0][opsi][2]" value="Tidak Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[marketplace][0][jawab]" value="3" class="survey-input"
@@ -1062,6 +1094,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">3</span>
 
                     </label>
+                    <input type="hidden" name="survey_data[marketplace][0][opsi][3]" value="Cukup Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[marketplace][0][jawab]" value="4" class="survey-input"
@@ -1069,6 +1102,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">4</span>
 
                     </label>
+                    <input type="hidden" name="survey_data[marketplace][0][opsi][4]" value="Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[marketplace][0][jawab]" value="5" class="survey-input"
@@ -1076,6 +1110,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">5</span>
                         <span class="rating-text">Sangat Sesuai</span>
                     </label>
+                    <input type="hidden" name="survey_data[marketplace][0][opsi][5]" value="Sangat Sesuai">
 
                 </div>
                 <input type="hidden" name="survey_data[marketplace][0][soal]" value="Seberapa mudah navigasi Anda menemukan produk yang dicari di Doran Gadget melalui
@@ -1094,6 +1129,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">1</span>
                         <span class="rating-text">Sangat Tidak Sesuai</span>
                     </label>
+                    <input type="hidden" name="survey_data[marketplace][1][opsi][1]" value="Sangat Tidak Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[marketplace][1][jawab]" value="2" class="survey-input"
@@ -1101,6 +1137,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">2</span>
 
                     </label>
+                    <input type="hidden" name="survey_data[marketplace][1][opsi][2]" value="Tidak Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[marketplace][1][jawab]" value="3" class="survey-input"
@@ -1108,6 +1145,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">3</span>
 
                     </label>
+                    <input type="hidden" name="survey_data[marketplace][1][opsi][3]" value="Cukup Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[marketplace][1][jawab]" value="4" class="survey-input"
@@ -1115,6 +1153,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">4</span>
 
                     </label>
+                    <input type="hidden" name="survey_data[marketplace][1][opsi][4]" value="Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[marketplace][1][jawab]" value="5" class="survey-input"
@@ -1122,6 +1161,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">5</span>
                         <span class="rating-text">Sangat Sesuai</span>
                     </label>
+                    <input type="hidden" name="survey_data[marketplace][1][opsi][5]" value="Sangat Sesuai">
 
                 </div>
                 <input type="hidden" name="survey_data[marketplace][1][soal]" value="Apakah metode pembayaran yang tersedia di Marketplace Doran Gadget memenuhi kebutuhan
@@ -1141,6 +1181,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">1</span>
                         <span class="rating-text">Sangat Tidak Sesuai</span>
                     </label>
+                    <input type="hidden" name="survey_data[marketplace][2][opsi][1]" value="Sangat Tidak Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[marketplace][2][jawab]" value="2" class="survey-input"
@@ -1148,6 +1189,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">2</span>
 
                     </label>
+                    <input type="hidden" name="survey_data[marketplace][2][opsi][2]" value="Tidak Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[marketplace][2][jawab]" value="3" class="survey-input"
@@ -1155,6 +1197,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">3</span>
 
                     </label>
+                    <input type="hidden" name="survey_data[marketplace][2][opsi][3]" value="Cukup Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[marketplace][2][jawab]" value="4" class="survey-input"
@@ -1162,6 +1205,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">4</span>
 
                     </label>
+                    <input type="hidden" name="survey_data[marketplace][2][opsi][4]" value="Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[marketplace][2][jawab]" value="5" class="survey-input"
@@ -1169,6 +1213,7 @@ function doran_survey_display_form_shortcode() {
                         <span class="rating-circle">5</span>
                         <span class="rating-text">Sangat Sesuai</span>
                     </label>
+                    <input type="hidden" name="survey_data[marketplace][2][opsi][5]" value="Sangat Sesuai">
 
                 </div>
                 <input type="hidden" name="survey_data[marketplace][2][soal]" value="Seberapa besar kemungkinan Anda merekomendasikan untuk berbelanja di Doran Gadget melalui
@@ -1192,6 +1237,7 @@ function doran_survey_display_form_shortcode() {
                         </span>
                         <span class="rating-text">Sangat Tidak Sesuai</span>
                     </label>
+                    <input type="hidden" name="survey_data[marketplace][3][opsi][1]" value="Sangat Tidak Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[marketplace][3][jawab]" value="2" class="survey-input"
@@ -1202,6 +1248,7 @@ function doran_survey_display_form_shortcode() {
                         </span>
 
                     </label>
+                    <input type="hidden" name="survey_data[marketplace][3][opsi][2]" value="Tidak Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[marketplace][3][jawab]" value="3" class="survey-input"
@@ -1211,6 +1258,7 @@ function doran_survey_display_form_shortcode() {
                                 height="32"></span>
 
                     </label>
+                    <input type="hidden" name="survey_data[marketplace][3][opsi][3]" value="Cukup Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[marketplace][3][jawab]" value="4" class="survey-input"
@@ -1221,6 +1269,7 @@ function doran_survey_display_form_shortcode() {
                         </span>
 
                     </label>
+                    <input type="hidden" name="survey_data[marketplace][3][opsi][4]" value="Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[marketplace][3][jawab]" value="5" class="survey-input"
@@ -1231,6 +1280,7 @@ function doran_survey_display_form_shortcode() {
                         </span>
                         <span class="rating-text">Sangat Sesuai</span>
                     </label>
+                    <input type="hidden" name="survey_data[marketplace][3][opsi][5]" value="Sangat Sesuai">
 
                 </div>
                 <input type="hidden" name="survey_data[marketplace][3][soal]" value="Bagaimana dengan garansi produk yang diberikan oleh Doran Gadget untuk produk yang
@@ -1253,6 +1303,7 @@ function doran_survey_display_form_shortcode() {
                         </span>
                         <span class="rating-text">Sangat Tidak Sesuai</span>
                     </label>
+                    <input type="hidden" name="survey_data[marketplace][4][opsi][1]" value="Sangat Tidak Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[marketplace][4][jawab]" value="2" class="survey-input"
@@ -1263,6 +1314,7 @@ function doran_survey_display_form_shortcode() {
                         </span>
 
                     </label>
+                    <input type="hidden" name="survey_data[marketplace][4][opsi][2]" value="Tidak Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[marketplace][4][jawab]" value="3" class="survey-input"
@@ -1272,6 +1324,7 @@ function doran_survey_display_form_shortcode() {
                                 height="32"></span>
 
                     </label>
+                    <input type="hidden" name="survey_data[marketplace][4][opsi][3]" value="Cukup Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[marketplace][4][jawab]" value="4" class="survey-input"
@@ -1282,6 +1335,7 @@ function doran_survey_display_form_shortcode() {
                         </span>
 
                     </label>
+                    <input type="hidden" name="survey_data[marketplace][4][opsi][4]" value="Sesuai">
 
                     <label class="rating-label">
                         <input type="radio" name="survey_data[marketplace][4][jawab]" value="5" class="survey-input"
@@ -1292,6 +1346,7 @@ function doran_survey_display_form_shortcode() {
                         </span>
                         <span class="rating-text">Sangat Sesuai</span>
                     </label>
+                    <input type="hidden" name="survey_data[marketplace][4][opsi][5]" value="Sangat Sesuai">
 
                 </div>
                 <input type="hidden" name="survey_data[marketplace][4][soal]"
