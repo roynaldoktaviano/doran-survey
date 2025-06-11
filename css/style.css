@@ -1,0 +1,161 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+/* css/style.css */
+#doran-survey-container {
+    max-width: 80%;
+    margin: 20px auto;
+    padding: 40px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-family: "Montserrat", sans-serif;
+    background-color: white;
+}
+.form-group {
+    margin-bottom: 40px;
+    width: 100%;
+    width: -webkit-fill-available;
+}
+
+h3 {
+color: #D61F31;
+font-weight: bold;
+}
+
+#questions-for-1 .form-group, #questions-for-2 .form-group, #questions-for-3 .form-group {
+    margin-bottom: 40px;
+    width: -webkit-fill-available;
+    border: 1px solid #d2d2d2;
+    padding: 20px 40px;
+    border-radius: 20px;
+    box-shadow: 5px 3px #eaeaea;
+}
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; 
+    font-family: "Montserrat", sans-serif;
+}
+.form-group input[readonly] {
+    background-color: #f0f0f0;
+    cursor: not-allowed;
+    
+}
+.form-group button {
+    background-color: #D61F31;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: "Montserrat", sans-serif;
+    transition: all;
+}
+.form-group button:hover {
+    background-color: #a70e1d;
+}
+
+
+.rating-scale-group {
+    display: flex;
+    justify-content: space-between; /* Menyebar pilihan secara merata */
+    align-items: flex-start;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.data-diri-atas {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    gap: 5%;
+}
+
+.data-diri-bawah {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    gap: 5%;
+}
+
+
+.rating-label input[type="radio"] {
+    display: none;
+}
+
+.rating-label {
+    display: flex;
+    flex-direction: column; /* Mengatur item jadi atas-bawah (lingkaran di atas teks) */
+    align-items: center;
+    cursor: pointer;
+    width: 20%; /* Membagi ruang untuk 5 item */
+    
+}
+
+.rating-circle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    margin: auto;
+    border-radius: 50%; /* Membuat jadi lingkaran sempurna */
+    border: 2px solid #ddd; /* Warna border default */
+    background-color: #fff;
+    color: #555;
+    font-weight: bold;
+    font-size: 16px;
+    transition: all 0.2s ease-in-out; /* Animasi halus saat di-hover atau di-klik */
+}
+
+.rating-text {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #d61f31;
+    font-family: "Montserrat", sans-serif;
+}
+
+
+.rating-label input[type="radio"]:checked + .rating-circle {
+    border-color: #d61f31; 
+    background-color: #EBF5FF; 
+    color: #d61f31; 
+    transform: scale(1.1); 
+}
+
+.rating-label:hover .rating-circle {
+    border-color: #d61f31;
+    background-color: #f0f8ff;
+}
+
+@media only screen and (max-width: 600px) {
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .data-diri-atas, .data-diri-bawah {
+        flex-direction: column;
+    gap: 5%;
+
+  }
+  #questions-for-1 .form-group, #questions-for-2 .form-group, #questions-for-3 .form-group {
+  
+    padding: 20px 15px;
+
+}
+
+#doran-survey-container {
+    width: 90%;
+    padding: 20px;
+}
+}
