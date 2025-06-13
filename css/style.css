@@ -332,8 +332,8 @@ label.media-selector {
     text-align: center;
 }
 
-.rating-label:hover .rating-circle, .rating-label:hover .rating-emoji  {
-    border-color: #d61f31;
+.rating-label:hover .rating-circle  {
+    border-color: #d61f31 !important;
 }
 
 @media only screen and (max-width: 600px) {
@@ -358,8 +358,8 @@ label.media-selector {
 }
 
 #doran-survey-container-question{
-    min-width: 80% !important;
-    max-width: 80% !important;
+    min-width: 90% !important;
+    max-width: 90% !important;
     padding: 20px !important;
 }
 

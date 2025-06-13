@@ -1,34 +1,25 @@
 <?php
-/**
- * Template untuk menampilkan satu pertanyaan survei.
- * Versi final yang sudah diperbaiki.
- */
-
 if (!defined('ABSPATH')) exit;
 
-// Ambil data yang sudah disiapkan oleh fungsi shortcode melalui variabel global
-global $doran_survey_data;
+$ref = isset($_GET['ref']) ? sanitize_text_field($_GET['ref']) : '';
+$question_number = isset($_GET['q']) ? intval($_GET['q']) : 1;
 
-// Logika untuk mendapatkan pertanyaan dari data yang dioper
-$question_number = $doran_survey_data['question_number'] ?? 1;
-$media_id = $doran_survey_data['media_id'] ?? 0;
-$ref = $doran_survey_data['ref'] ?? '';
-$media_key = '';
-if ($media_id == 1) $media_key = 'offline';
-elseif ($media_id == 2) $media_key = 'online';
-elseif ($media_id == 3) $media_key = 'marketplace';
+$survey_progress = get_transient('doran_survey_progress_' . $ref);
+if ($survey_progress === false) {
+    echo '<p>Sesi survei tidak ditemukan atau telah berakhir. Silakan mulai dari awal.</p>';
+    return; // Hentikan jika tidak ada data transient
+}
 
+$media_id = $survey_progress['media_id'] ?? 0;
+$media_key = $media_id == 1 ? 'offline' : ($media_id == 2 ? 'online' : 'marketplace');
 $all_questions = get_doran_survey_questions();
-$question_set = !empty($media_key) && isset($all_questions[$media_key]) ? $all_questions[$media_key] : [];
+$question_set = !empty($media_key) ? ($all_questions[$media_key] ?? []) : [];
 $current_question = !empty($question_set) && isset($question_set[$question_number]) ? $question_set[$question_number] : null;
 $total_questions = count($question_set);
-
-// Ambil jawaban tersimpan dari sesi untuk pre-fill (jika pengguna kembali ke pertanyaan sebelumnya)
-if (!session_id()) session_start();
-$saved_answer = $_SESSION['doran_survey_answers_final'][$question_number] ?? '';
-
-// get_header();
+$saved_answers = $survey_progress['answers'] ?? [];
+$saved_answer = $saved_answers[$question_number] ?? '';
 ?>
+
 <div id="doran-survey-container-question">
     <?php if ($current_question) : // Kondisi ini akan true jika pertanyaan ditemukan ?>
     <div class="survey-progress">
@@ -46,6 +37,13 @@ $saved_answer = $_SESSION['doran_survey_answers_final'][$question_number] ?? '';
         <input type="hidden" name="question_number" value="<?php echo esc_attr($question_number); ?>">
         <input type="hidden" name="survey_media" value="<?php echo esc_attr($media_id); ?>">
         <?php wp_nonce_field('doran_survey_step_action', 'doran_survey_nonce'); ?>
+
+        <?php if (!empty($saved_answers)) : ?>
+        <?php foreach ($saved_answers as $q_num => $q_ans) : ?>
+        <input type="hidden" name="previous_answers[<?php echo esc_attr($q_num); ?>]"
+            value="<?php echo esc_attr($q_ans); ?>">
+        <?php endforeach; ?>
+        <?php endif; ?>
 
         <div class="form-group">
             <label class="question-title"><?php echo esc_html($current_question['soal']); ?></label>

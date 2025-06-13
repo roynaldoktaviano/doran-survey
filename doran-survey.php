@@ -6,7 +6,7 @@
  * Plugin Name:       Doran Survey
  * Plugin URI:        https://doran.id/
  * Description:       Doran Survey get data from API
- * Version:           2.0.0
+ * Version:           2.1.0
  * Requires at least: 3.4
  * Requires PHP:      7.4
  * Author:            PT Doran Sukses Indonesia
@@ -33,7 +33,7 @@ add_action('init', 'doran_survey_start_session', 1);
 if ( ! function_exists('doran_survey_register_submission_cpt') ) {
     function doran_survey_register_submission_cpt() {
         // ... (Isi fungsi sama persis dengan kode v3.1 sebelumnya)
-        $args = array('labels' => array('name' => 'Hasil Survei', 'singular_name' => 'Hasil Survei', 'menu_name' => 'Doran Survey'), 'public' => false, 'show_ui' => true, 'show_in_menu' => true, 'menu_position' => 25, 'menu_icon' => 'dashicons-feedback', 'supports' => array('title'), 'capability_type' => 'post', 'capabilities' => array('create_posts' => false), 'map_meta_cap' => true);
+        $args = array('labels' => array('name' => 'Hasil Survei', 'singular_name' => 'Hasil Survei', 'menu_name' => 'Doran Survey'), 'public' => false, 'show_ui' => true, 'show_in_menu' => true, 'menu_position' => 25, 'menu_icon' => 'dashicons-portfolio', 'supports' => array('title'), 'capability_type' => 'post', 'capabilities' => array('create_posts' => false), 'map_meta_cap' => true);
         register_post_type('survey_submission', $args);
     }
     add_action('init', 'doran_survey_register_submission_cpt');
@@ -351,7 +351,8 @@ if ( ! function_exists('get_doran_survey_questions') ) {
             ],
             6 => [
                 'soal' => 'Apa Masukan Anda untuk Doran Gadget (Marketplace) untuk lebih baik ke depannya? Tuliskan Jawaban Anda!', 
-                'jenis' => 2
+                'jenis' => 2,
+                
             ]
         ]
         ];
@@ -417,162 +418,190 @@ if ( ! function_exists('doran_multi_page_survey_shortcode') ) {
 }
 
 
-if ( ! function_exists('doran_survey_handle_step_submission') ) {
-    // function doran_survey_handle_step_submission() {
-    //     if (!isset($_POST['doran_survey_nonce']) || !wp_verify_nonce($_POST['doran_survey_nonce'], 'doran_survey_step_action')) { wp_die('Verifikasi keamanan gagal.'); }
-    //     $ref = sanitize_text_field($_POST['survey_ref']);
-    //     $current_step = sanitize_text_field($_POST['survey_step']);
 
-        
-    // // echo '<div style="font-family: monospace; background: #f1f1f1; padding: 20px; border: 1px solid #ccc;">';
-    // // echo '<h1>DEBUG: Menangani Submit Form</h1>';
 
-    // // echo '<h2>Data yang Dikirim dari Form (POST):</h2>';
-    // // echo '<pre>';
-    // // print_r($_POST);
-    // // echo '</pre>';
-
-    // // if ($current_step === 'start') {
-    // //     if (isset($_POST['survey_media']) && !empty($_POST['survey_media'])) {
-    // //         // Simpan media ke sesi
-    // //         $_SESSION['doran_customer_data']['media'] = intval($_POST['survey_media']);
-
-    // //         echo '<h2>Data Sesi (SESSION) setelah pembaruan:</h2>';
-    // //         echo '<pre>';
-    // //         print_r($_SESSION);
-    // //         echo '</pre>';
-
-    // //         $page_url = home_url('/doran-survey/');
-    // //         $redirect_url = add_query_arg(['ref' => $ref, 'step' => 'question', 'q' => 1], $page_url);
-
-    // //         echo '<h2>Informasi Pengalihan (Redirect):</h2>';
-    // //         echo '<p>Jika tidak ada error, Anda seharusnya diarahkan ke URL ini:</p>';
-    // //         echo '<strong><a href="' . esc_url($redirect_url) . '">' . esc_html($redirect_url) . '</a></strong>';
-
-    // //     } else {
-    // //         echo '<h2><strong style="color:red;">ERROR:</strong></h2>';
-    // //         echo '<p>Field "survey_media" (pilihan lokasi pembelian) tidak terkirim atau kosong. Proses tidak bisa dilanjutkan.</p>';
-    // //     }
-    // // } else {
-    // //      echo '<h2><strong style="color:red;">ERROR:</strong></h2>';
-    // //      echo '<p>Langkah saat ini terdeteksi bukan "start". Step terdeteksi: ' . esc_html($current_step) . '</p>';
-    // // }
-
-    // // echo '</div>';
-    // // wp_die();
-
-    //     $page_url = home_url('/doran-survey/');
-    //     if (!isset($_SESSION['doran_survey_answers'])) $_SESSION['doran_survey_answers'] = [];
-    //     if (!isset($_SESSION['doran_customer_data'])) { wp_redirect($page_url . '?ref=' . $ref); exit; }
-        
-    //     $redirect_url = $page_url;
-    //     if ($current_step === 'start') {
-    //         $_SESSION['doran_customer_data']['media'] = intval($_POST['survey_media']);
-    //         $redirect_url = add_query_arg(['ref' => $ref, 'step' => 'question', 'q' => 1], $page_url);
-    //     } elseif ($current_step === 'question') {
-    //         $question_number = intval($_POST['question_number']);
-    //         if (isset($_POST['survey_answer'])) $_SESSION['doran_survey_answers'][$question_number] = wp_kses_post($_POST['survey_answer']);
-    //         $media = $_SESSION['doran_customer_data']['media'] ?? 0;
-    //         $media_key = $media == 1 ? 'offline' : ($media == 2 ? 'online' : 'marketplace');
-    //         $all_questions = get_doran_survey_questions();
-    //         $total_questions = count($all_questions[$media_key] ?? []);
-    //         $next_question_number = $question_number + 1;
-    //         if ($next_question_number <= $total_questions) {
-    //             $redirect_url = add_query_arg(['ref' => $ref, 'step' => 'question', 'q' => $next_question_number], $page_url);
-    //         } else {
-    //             doran_survey_process_final_submission($ref);
-    //             $redirect_url = add_query_arg(['ref' => $ref, 'step' => 'thank_you'], $page_url);
-    //         }
-    //     }
-    //     wp_redirect($redirect_url);
-    //     exit;
-    // }
-    function doran_survey_handle_step_submission() {
+if (!function_exists('doran_survey_handle_submission_with_transient')) {
+    function doran_survey_handle_submission_with_transient() {
     if (!isset($_POST['doran_survey_nonce']) || !wp_verify_nonce($_POST['doran_survey_nonce'], 'doran_survey_step_action')) {
-       wp_die('Verifikasi keamanan gagal.');
+        wp_die('Verifikasi keamanan gagal.');
     }
 
     $ref = sanitize_text_field($_POST['survey_ref']);
     $current_step = sanitize_text_field($_POST['survey_step']);
-    $page_url = home_url('/doran-survey/'); // Pastikan slug halaman Anda adalah 'doran-survey'
+    $page_url = home_url('/doran-survey/');
 
-    if (!session_id()) { session_start(); } // Sesi tetap dipakai untuk simpan jawaban, tapi tidak untuk logika utama
+    $transient_key = 'doran_survey_progress_' . $ref;
+    $survey_progress = get_transient($transient_key);
+    
+    if ($survey_progress === false) {
+        $survey_progress = [];
+    }
 
-    $redirect_url = add_query_arg('ref', $ref, $page_url); // Default redirect jika ada masalah
+    $redirect_url = add_query_arg('ref', $ref, $page_url);
 
     if ($current_step === 'start') {
-        $media_id = intval($_POST['survey_media']);
-        // Simpan data customer ke sesi untuk proses final di akhir
-        $_SESSION['doran_customer_data_final'] = [
-            'nama'     => sanitize_text_field($_POST['customer_nama']),
-            'telp'     => sanitize_text_field($_POST['customer_telp']),
-            'email'    => sanitize_email($_POST['customer_email']),
-            'domisili' => sanitize_text_field($_POST['customer_domisili']),
-            'ref'      => $ref,
-            'media'    => $media_id
+        // Logika ini sudah benar, membuat transient awal
+       $survey_progress = [
+            'customer_data' => [
+                'nama'     => sanitize_text_field($_POST['customer_nama']),
+                'telp'     => sanitize_text_field($_POST['customer_telp']),
+                'email'    => sanitize_email($_POST['customer_email']),
+                'domisili' => sanitize_text_field($_POST['customer_domisili']),
+            ],
+            'media_id' => intval($_POST['survey_media']),
+            'answers'  => [] 
         ];
-        $_SESSION['doran_survey_answers_final'] = []; // Kosongkan jawaban lama
 
-        // Redirect ke pertanyaan pertama DENGAN menyertakan parameter media
-        $redirect_url = add_query_arg(['ref' => $ref, 'step' => 'question', 'q' => 1, 'media' => $media_id], $page_url);
+        $redirect_url = add_query_arg(['ref' => $ref, 'step' => 'question', 'q' => 1], $page_url);
 
-    } 
-    elseif ($current_step === 'question') {
+    } elseif ($current_step === 'question') {
         $question_number = intval($_POST['question_number']);
-        $media_id = intval($_POST['survey_media']); // Ambil media dari hidden input di form
+    
+        $current_answers = $survey_progress['answers'] ?? [];
         
         if (isset($_POST['survey_answer'])) {
-            $_SESSION['doran_survey_answers_final'][$question_number] = wp_kses_post($_POST['survey_answer']);
+            $current_answers[$question_number] = sanitize_textarea_field($_POST['survey_answer']);
         }
+        $survey_progress['answers'] = $current_answers;
+ 
         
-        $media_key = $media_id == 1 ? 'offline' : ($media_id == 2 ? 'online' : 'marketplace');
+        $media_id = $survey_progress['media_id'] ?? 0;
+        $media_key = ($media_id == 1) ? 'offline' : (($media_id == 2) ? 'online' : 'marketplace');
         $all_questions = get_doran_survey_questions();
         $total_questions = count($all_questions[$media_key] ?? []);
         
         $next_question_number = $question_number + 1;
 
         if ($next_question_number <= $total_questions) {
-            // Arahkan ke pertanyaan berikutnya, oper lagi parameter media
-            $redirect_url = add_query_arg(['ref' => $ref, 'step' => 'question', 'q' => $next_question_number, 'media' => $media_id], $page_url);
+            $redirect_url = add_query_arg(['ref' => $ref, 'step' => 'question', 'q' => $next_question_number], $page_url);
         } else {
-            doran_survey_process_final_submission($ref); // Proses data final dari sesi
+            // Sebelum redirect, simpan dulu transient terakhir kalinya
+            set_transient($transient_key, $survey_progress, HOUR_IN_SECONDS);
+            // Baru panggil fungsi final (yang akan membaca transient ini)
+            doran_survey_process_final_submission_with_transient($ref);
             $redirect_url = add_query_arg(['ref' => $ref, 'step' => 'thank_you'], $page_url);
+            wp_redirect($redirect_url);
+            exit;
         }
     }
+    
+    // Simpan progres ke transient di setiap langkah
+    set_transient($transient_key, $survey_progress, HOUR_IN_SECONDS);
     
     wp_redirect($redirect_url);
     exit;
 }
-    add_action('admin_post_nopriv_submit_doran_survey_step', 'doran_survey_handle_step_submission');
-    add_action('admin_post_submit_doran_survey_step', 'doran_survey_handle_step_submission');
+    add_action('admin_post_nopriv_submit_doran_survey_step', 'doran_survey_handle_submission_with_transient');
+    add_action('admin_post_submit_doran_survey_step', 'doran_survey_handle_submission_with_transient');
 }
 
-if ( ! function_exists('doran_survey_process_final_submission') ) {
-    function doran_survey_process_final_submission($ref) {
-        if (empty($_SESSION['doran_customer_data']) || empty($_SESSION['doran_survey_answers'])) return;
-        $customer_data = $_SESSION['doran_customer_data'];
-        $answers_data = $_SESSION['doran_survey_answers'];
-        $media = $customer_data['media'] ?? 0;
-        $media_key = $media == 1 ? 'offline' : ($media == 2 ? 'online' : 'marketplace');
-        $all_questions = get_doran_survey_questions()[$media_key] ?? [];
-        $formatted_data_for_cpt = [];
-        foreach ($all_questions as $q_num => $q_details) {
-            $answer = isset($answers_data[$q_num]) ? $answers_data[$q_num] : '';
-            if (!empty($answer)) $formatted_data_for_cpt[] = ['soal' => $q_details['soal'], 'jawab' => $answer];
-        }
-        if (empty($formatted_data_for_cpt)) return;
-        $post_title = 'Survei dari ' . ($customer_data['nama'] ?? 'Unknown') . ' (' . $ref . ') pada ' . current_time('d-m-Y H:i');
-        $post_id = wp_insert_post(['post_title' => $post_title, 'post_status' => 'publish', 'post_type' => 'survey_submission']);
-        if ($post_id && !is_wp_error($post_id)) {
-            update_post_meta($post_id, 'customer_nama', $customer_data['nama'] ?? '');
-            update_post_meta($post_id, 'customer_telp', $customer_data['telp'] ?? '');
-            update_post_meta($post_id, 'survey_media', $media);
-            update_post_meta($post_id, 'survey_answers', $formatted_data_for_cpt);
-            update_post_meta($post_id, 'transaction_ref', $ref);
-        }
-        // ... (Kode wp_remote_post Anda yang dinonaktifkan sementara) ...
-        unset($_SESSION['doran_survey_answers'], $_SESSION['doran_customer_data']);
+if (!function_exists('doran_survey_process_final_submission_with_transient')) {
+    function doran_survey_process_final_submission_with_transient($ref) {
+    $transient_key = 'doran_survey_progress_' . $ref;
+    $survey_data = get_transient($transient_key);
+
+    // 1. Validasi: Pastikan data transient lengkap
+    if ($survey_data === false || empty($survey_data['customer_data']) || !isset($survey_data['answers']) || !is_array($survey_data['answers'])) {
+        error_log("Doran Survey FINAL GAGAL: Data transient tidak lengkap atau tidak ditemukan untuk REF: " . $ref);
+        // Mungkin redirect ke halaman error atau kembali ke awal
+        wp_redirect(home_url('/doran-survey/?ref=' . $ref . '&survey_error=transient'));
+        exit;
     }
+
+    // 2. Ambil data dari transient dengan benar
+    $customer_data = $survey_data['customer_data'];
+    $answers_data = $survey_data['answers'];
+    $media = $survey_data['media_id'] ?? 0;
+    $media_key = ($media == 1) ? 'offline' : (($media == 2) ? 'online' : 'marketplace');
+    $all_questions = get_doran_survey_questions()[$media_key] ?? [];
+    
+    // 3. Format data untuk disimpan ke CPT dan dikirim ke API
+    $formatted_data_cpt = [];
+    $formatted_data_api = [];
+
+    if (!empty($all_questions) && !empty($answers_data)) {
+        foreach ($all_questions as $q_num => $q_details) {
+            // Cek apakah ada jawaban untuk pertanyaan ini
+            if (isset($answers_data[$q_num]) && !empty($answers_data[$q_num])) {
+                $answer_text = $answers_data[$q_num];
+                
+                // Simpan untuk CPT
+                $formatted_data_cpt[] = [
+                    'urutan' => $q_num,
+                    'jenis'  => $q_details['jenis'],
+                    'soal'   => $q_details['soal'],
+                    'jawab'  => $answer_text,
+                    'opsi'   => $q_details['opsi'] ?? []
+                ];
+
+                // Siapkan untuk API
+                $formatted_data_api[] = [
+                    'urutan' => $q_num,
+                    'jenis'  => $q_details['jenis'],
+                    'soal'   => $q_details['soal'],
+                    'jawab'  => $answer_text,
+                    'opsi'   => $q_details['opsi'] ?? []
+                ];
+            }
+        }
+    }
+    
+    // Jika tidak ada jawaban sama sekali, jangan lanjutkan
+    if (empty($formatted_data_cpt)) {
+        error_log("Doran Survey FINAL GAGAL: Tidak ada jawaban valid yang bisa diproses untuk REF: " . $ref);
+        delete_transient($transient_key);
+        return;
+    }
+
+    // 4. Buat CPT baru untuk menyimpan hasil survei
+    $post_title = 'Survei dari ' . ($customer_data['nama'] ?? 'Anonim') . ' (' . $ref . ') pada ' . current_time('d-m-Y H:i');
+    $post_id = wp_insert_post([
+        'post_title'  => $post_title,
+        'post_status' => 'publish',
+        'post_type'   => 'survey_submission',
+    ], true); 
+    
+
+    if (is_wp_error($post_id)) {
+        error_log("[DORAN SURVEY FINAL] Gagal wp_insert_post() untuk REF {$ref}: " . $post_id->get_error_message());
+    } else {
+        // Jika CPT berhasil dibuat, simpan semua meta data
+        update_post_meta($post_id, 'customer_nama',     $customer_data['nama'] ?? '');
+        update_post_meta($post_id, 'customer_telp',     $customer_data['telp'] ?? '');
+        update_post_meta($post_id, 'customer_email',    $customer_data['email'] ?? '');
+        update_post_meta($post_id, 'customer_domisili', $customer_data['domisili'] ?? '');
+        update_post_meta($post_id, 'survey_media',      $media);
+        update_post_meta($post_id, 'survey_answers',    $formatted_data_cpt); // Simpan jawaban yang sudah diformat
+        update_post_meta($post_id, 'transaction_ref',   $ref);
+        error_log("[DORAN SURVEY FINAL] Data survei untuk REF {$ref} berhasil disimpan ke CPT ID: {$post_id}");
+    }
+    
+    // 5. Siapkan dan kirim data ke API eksternal
+    $body_payload = [
+        'media' => $media,
+        'data'  => $formatted_data_api,
+    ];
+
+    $base = md5(date('Y-m-d') . '_ord_' . $ref);
+    // $api_url = sprintf('https://kasir.doran.id/api/product/submit?base=%s&ref=%s', $base, $ref);
+    $api_url = sprintf('https://kasir.doran.id/api/product/submit?base=f7d520bcc0907a0e39069cc979c101e3&ref=NTczNDIxMQ==');
+    
+    $api_response = wp_remote_post($api_url, [
+        'method'      => 'POST',
+        'headers'     => ['Content-Type' => 'application/json; charset=utf-8'],
+        'body'        => json_encode($body_payload),
+        'data_format' => 'body',
+    ]);
+
+    if(is_wp_error($api_response)) {
+        error_log('[DORAN SURVEY FINAL] Gagal kirim ke API eksternal (WP_Error) untuk REF ' . $ref . ': ' . $api_response->get_error_message());
+    } else {
+        error_log('[DORAN SURVEY FINAL] Respons dari API eksternal untuk REF ' . $ref . '. Kode: ' . wp_remote_retrieve_response_code($api_response));
+    }
+    
+    // 6. Hapus transient setelah semua proses selesai
+    delete_transient($transient_key);
+}
 }
 
 // ... (Sisa fungsi-fungsi lain dibungkus dalam if !function_exists juga) ...
