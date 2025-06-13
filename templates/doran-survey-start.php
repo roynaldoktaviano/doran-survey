@@ -3,7 +3,7 @@ global $doran_survey_data;
 // get_header(); // Jika ingin menggunakan header tema Anda
 ?>
 <div id="doran-survey-container">
-    <img src="https://dorangadget.com/wp-content/uploads/2025/06/survey.png" alt="" style="width: 30%;">
+    <img class="start-img" src="https://dorangadget.com/wp-content/uploads/2025/06/survey.png" alt="" style="">
     <p class="start-greeting">Halo kak <?php echo esc_html($doran_survey_data['customer']['nama']); ?>, </p>
     <h1>Terima kasih telah
         berbelanja! Kami ingin dengar Feedback Anda.</h1>

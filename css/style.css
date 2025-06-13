@@ -259,6 +259,10 @@ label.media-selector {
     transition: all 0.2s ease-in-out;
 }
 
+.start-img {
+    width: 30% !important;
+}
+
 
 .rating-label:has(input[type="radio"]:checked) .rating-text {
   color: #d61f31 !important;
@@ -367,4 +371,9 @@ label.media-selector {
     width: 50% !important;
     margin-bottom: 20px;
 }
+
+.start-img {
+    width: 60% !important;
+}
+
 }
