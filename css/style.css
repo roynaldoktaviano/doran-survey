@@ -2,22 +2,63 @@
 /* css/style.css */
 #doran-survey-container {
     max-width: 80%;
-    margin: 20px auto;
+    margin: auto;
+    padding: 24px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-family: "Montserrat", sans-serif;
+    background-color: white;
+    text-align: center;
+}
+#doran-survey-container-question {
+    max-width: 50%;
+    margin: auto;
     padding: 40px;
     border: 1px solid #ddd;
     border-radius: 10px;
     font-family: "Montserrat", sans-serif;
     background-color: white;
+    text-align: center;
+    min-width: 50%;
 }
 .form-group {
-    margin-bottom: 40px;
+    margin-bottom: 20px;
     width: 100%;
     width: -webkit-fill-available;
 }
 
+.fg-star label {
+    margin-bottom: 0 !important;
+}
+
+.fg-start {
+    display: flex !important;
+    align-items:center !important;
+    justify-content: center !important;
+    gap: 20px;
+}
+
+.konfirmasi-container h3 {
+    color: white;
+    margin-bottom: 20px;
+}
+
+.emoji-quest {
+    display: flex !important;
+    flex-direction: column !important;
+}
+
 h3 {
-color: #D61F31;
 font-weight: bold;
+font-size: 18px;
+}
+
+.konfirmasi-container {
+    background-color: #D61F31;
+    color: white;
+    padding: 4px 24px;
+    border-radius: 4px;
+    margin-bottom: 30px;
 }
 
 h3,h4 {
@@ -34,8 +75,8 @@ h3,h4 {
 }
 .form-group label {
     display: block;
-    font-weight: bold;
-    margin-bottom: 5px;
+    font-weight: 500;
+    margin-bottom: 14px;
     font-size: 14px;
 }
 .form-group input[type="text"],
@@ -54,112 +95,276 @@ h3,h4 {
     cursor: not-allowed;
     
 }
-.form-group button {
-    background-color: #D61F31;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    font-family: "Montserrat", sans-serif;
-    transition: all;
-}
-.form-group button:hover {
-    background-color: #a70e1d;
+
+#doran-survey-container p, #doran-survey-container h1 {
+    font-family: "Montserrat", sans-serif !important;
 }
 
+#doran-survey-container h1 {
+    font-size: 16px !important;
+}
+
+.survey-progress p {
+    text-align: left !important;
+    font-weight: 600 !important;
+    font-size: 20px !important;
+    font-family: "Montserrat", sans-serif !important;
+}
+
+.prog-num {
+    color: #d61f31;
+}
+
+.question-title {
+    text-align: left;
+    margin-bottom: 24px !important;
+}
+
+.button-prev-question {
+    background-color: gray !important;
+    color: white !important;
+     padding: 10px 15px !important;
+    border: none !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    font-family: "Montserrat", sans-serif !important;
+    transition: all !important;
+    text-decoration: none !important;
+}
+.form-group button, .button-start-survey, .button-next-question  {
+    background-color: #D61F31 !important;
+    color: white !important;
+    padding: 10px 15px !important;
+    border: none !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    font-family: "Montserrat", sans-serif !important;
+    transition: all !important;
+}
+.form-group button:hover, .button-start-survey:hover, .button-next-question:hover  {
+    background-color: #a70e1d !important;
+}
 
 .rating-scale-group {
-    display: flex;
-    justify-content: space-between; /* Menyebar pilihan secara merata */
-    align-items: flex-start;
-    margin-top: 10px;
-    text-align: center;
+    display: flex !important;
+    justify-content: space-between !important; /* Menyebar pilihan secara merata */
+    align-items: flex-start !important;
+    margin-top: 10px !important;
+    text-align: center !important;
 }
 
 .data-diri-atas {
-    display: flex;
-    width: 100%;
-    justify-content: space-between;
-    gap: 5%;
+    display: flex !important;
+    width: 100% !important;
+    justify-content: space-between !important;
+    gap: 5% !important;
 }
 
 .data-diri-bawah {
-    display: flex;
-    width: 100%;
-    justify-content: space-between;
-    gap: 5%;
+    display: flex !important;
+    width: 100% !important;
+    justify-content: space-between !important;
+    gap: 5% !important;
+}
+
+label.media-selector {
+    margin-bottom: 20px !important;
+}
+
+#media-selector {
+    width: 50% !important;
+    font-size: 14px !important;
+}
+
+.data-diri {
+    text-align: left !important;
+    background-color: white !important;
+    text-align: red !important;
+    border-radius: 8px !important;
+    padding: 10px !important;
 }
 
 
 .rating-label input[type="radio"] {
-    display: none;
+    display: none !important;
 }
 
 .rating-label {
-    display: flex;
-    flex-direction: column; /* Mengatur item jadi atas-bawah (lingkaran di atas teks) */
-    align-items: center;
-    cursor: pointer;
-    width: 20%; /* Membagi ruang untuk 5 item */
+    display: flex !important;
+    flex-direction: column !important; 
+    align-items: center !important;
+    cursor: pointer !important;
+    width: 20% !important; 
     
 }
 
+.rating-emoji {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    margin: auto !important;
+    font-weight: bold !important;
+    font-size: 16px !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
 .rating-circle {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 40px;
-    height: 40px;
-    margin: auto;
-    border-radius: 50%; /* Membuat jadi lingkaran sempurna */
-    border: 2px solid #ddd; /* Warna border default */
-    background-color: #fff;
-    color: #555;
-    font-weight: bold;
-    font-size: 16px;
-    transition: all 0.2s ease-in-out; /* Animasi halus saat di-hover atau di-klik */
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    margin: auto !important;
+    border-radius: 50% !important; 
+    border: 1px solid #ddd !important; 
+    background-color: #fff !important;
+    color: #555 !important;
+    font-weight: bold !important;
+    font-size: 16px !important;
+    transition: all 0.2s ease-in-out !important; /* Animasi halus saat di-hover atau di-klik */
 }
 
 .rating-text {
-    margin-top: 8px;
-    font-size: 12px;
-    color: #d61f31;
-    font-family: "Montserrat", sans-serif;
+    margin-top: 8px !important;
+    font-size: 10px !important;
+    color: #555 !important;
+    font-family: "Montserrat", sans-serif !important;
+    transition: all 0.2s ease-in-out !important;
+    font-weight: normal !important;
 }
 
+.thank-you-img {
+    width: 25% !important;
+}
+
+.thank-you-desc {
+    margin-bottom: 6px !important;
+}
+
+.thank-you-btn {
+    background-color: #d61f31 !important;
+    padding: 10px !important;
+    border-radius: 8px !important;
+    color: white !important;
+    font-family: 'Montserrat' !important;
+    font-size: 12px !important;
+}
+
+.rating-emoji img {
+    filter: grayscale() ;
+    transition: all 0.2s ease-in-out;
+}
+
+
+.rating-label:has(input[type="radio"]:checked) .rating-text {
+  color: #d61f31 !important;
+}
+
+.rating-label:has(input[type="radio"]:checked) .rating-emoji img {
+ filter: none !important;
+    transform: scale(1.2) !important; 
+}
+
+
+.rating-label input[type="radio"]:checked + .rating-emoji img {
+    filter: none !important;
+    transform: scale(1.2) !important; 
+}
 
 .rating-label input[type="radio"]:checked + .rating-circle {
-    border-color: #d61f31; 
-    background-color: #EBF5FF; 
-    color: #d61f31; 
-    transform: scale(1.1); 
+    border-color: #d61f31 !important; 
+    background-color: #d61f31 !important; 
+    color: #EBF5FF !important; 
+    transform: scale(1.1) !important; 
 }
 
-.rating-label:hover .rating-circle {
+#doran-survey-container h1, #doran-survey-container-question h1 {
+    font-size: 20px;
+    font-weight: bold;
+    text-align: center;
+    margin: 0;
+    padding: 6px 0;
+}
+
+.data-nama {
+    font-size: 14px;
+    font-weight: bold;
+    padding: 0;
+    margin: 4px 0;
+    color: #d61f31;
+}
+
+.nama-customer {
+    font-size: 16px;
+    padding: 0;
+    margin: 0;
+    color: #d61f31;
+}
+.data-diri-container{
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    
+}
+
+#doran-survey-container hr {
+    margin: 30px 0;
+}
+
+.start-greeting {
+    font-size: 16px !important;
+    text-align: center;
+    font-weight: bold;
+    margin: 0;
+    padding: 0;
+}
+
+.start-description {
+    font-size: 12px !important;
+    text-align: center;
+}
+
+.rating-label:hover .rating-circle, .rating-label:hover .rating-emoji  {
     border-color: #d61f31;
-    background-color: #f0f8ff;
 }
 
 @media only screen and (max-width: 600px) {
   .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 20px !important;
   }
 
   .data-diri-atas, .data-diri-bawah {
-        flex-direction: column;
-    gap: 5%;
+        flex-direction: column !important;
+    gap: 5% !important;
 
   }
   #questions-for-1 .form-group, #questions-for-2 .form-group, #questions-for-3 .form-group {
   
-    padding: 20px 15px;
+    padding: 20px 15px !important;
 
 }
 
 #doran-survey-container {
-    width: 90%;
-    padding: 20px;
+    width: 90% !important;
+    padding: 20px !important;
+}
+
+#doran-survey-container-question{
+    min-width: 80% !important;
+    max-width: 80% !important;
+    padding: 20px !important;
+}
+
+#media-selector {
+    width: 80% !important;
+}
+
+.thank-you-img {
+    width: 50% !important;
+    margin-bottom: 20px;
 }
 }

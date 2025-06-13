@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Doran Survey
  *
@@ -7,7 +6,7 @@
  * Plugin Name:       Doran Survey
  * Plugin URI:        https://doran.id/
  * Description:       Doran Survey get data from API
- * Version:           1.0.0
+ * Version:           2.0.0
  * Requires at least: 3.4
  * Requires PHP:      7.4
  * Author:            PT Doran Sukses Indonesia
@@ -15,109 +14,84 @@
  * License:           GPL v2 or later
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  */
-// Mencegah akses langsung ke file
+
 if ( ! defined( 'ABSPATH' ) ) {
     exit;
 }
 
-/**
- * Mendaftarkan Custom Post Type untuk menampung data hasil survei.
- */
-function doran_survey_register_submission_cpt() {
-    $args = array(
-        'labels'        => array(
-            'name'          => 'Survey Submissions',
-            'singular_name' => 'Survey Submission',
-            'add_new'       => _x( 'Add New', 'survey_submission' ), // Teks ini tidak akan muncul
-            'add_new_item'  => _x( 'Add New Survey Submission', 'survey_submission' ),
-        ),
-        'public'        => false,
-        'show_ui'       => true,
-        'show_in_menu'  => true,
-        'menu_position' => 20,
-        'menu_icon'     => 'dashicons-feedback',
-        'supports'      => array( 'title' ),
-        'capability_type' => 'post', // Gunakan 'post' sebagai dasar
-        
-        // --- BAGIAN PENTING DIMULAI DI SINI ---
-        'capabilities' => array(
-            // Matikan kemampuan untuk membuat post baru
-            'create_posts' => false, 
-        ),
-        // Map meta caps untuk mencegah edit dan delete
-        // Ini adalah cara WordPress untuk memastikan bahkan admin tidak bisa edit/delete post tipe ini
-        'map_meta_cap' => true,
-        // --- BAGIAN PENTING SELESAI ---
-    );
-    register_post_type( 'survey_submission', $args );
-}
-add_action( 'init', 'doran_survey_register_submission_cpt' );
-
-function remove_survey_submission_row_actions($actions, $post) {
-    // Cek apakah kita berada di CPT yang benar
-    if ($post->post_type === 'survey_submission') {
-        // Hapus link 'Edit'
-        unset($actions['edit']);
-        // Hapus link 'Quick Edit' (kuncinya adalah 'inline hide-if-no-js')
-        unset($actions['inline hide-if-no-js']);
-        // Hapus link 'Trash'
-        unset($actions['trash']);
-        // Hapus link 'View' (jika ada)
-        unset($actions['view']);
-    }
-    return $actions;
-}
-add_filter('post_row_actions', 'remove_survey_submission_row_actions', 10, 2);
-
-function remove_survey_submission_bulk_actions($actions) {
-    // Kembalikan array kosong untuk menghapus semua opsi bulk action
-    return array();
-}
-add_filter('bulk_actions-edit-survey_submission', 'remove_survey_submission_bulk_actions');
-
-function set_custom_survey_submission_columns($columns) {
-    unset($columns['cb']); 
-    unset($columns['date']); // Hapus kolom tanggal default
-    unset($columns['title']); // Hapus kolom tanggal default
-    $columns['customer_name'] = 'Nama Pelanggan';
-    $columns['customer_telp'] = 'No. Telepon';
-    $columns['survey_media'] = 'Media Pembelian';
-    $columns['submission_time'] = 'Waktu Submit';
-    $columns['actions'] = 'Tindakan'; // Kolom baru untuk tombol
-    return $columns;
-}
-add_filter('manage_survey_submission_posts_columns', 'set_custom_survey_submission_columns');
-
-function custom_survey_submission_column_data($column, $post_id) {
-    switch ($column) {
-        case 'customer_name':
-            echo esc_html(get_post_meta($post_id, 'customer_nama', true));
-            break;
-
-        case 'customer_telp':
-            echo esc_html(get_post_meta($post_id, 'customer_telp', true));
-            break;
-
-        case 'survey_media':
-            $media_id = intval(get_post_meta($post_id, 'survey_media', true));
-            $media_text = $media_id;
-            if ($media_id == 1) $media_text = 'Offline';
-            elseif ($media_id == 2) $media_text = 'Online';
-            elseif ($media_id == 3) $media_text = 'Marketplace';
-            echo $media_text;
-            break;
-            
-        case 'submission_time':
-            echo get_the_date('d-m-Y H:i:s', $post_id);
-            break;
-            
-        case 'actions':
-            // Tombol ini akan memicu pop-up. Kita tambahkan post ID sebagai data-attribute.
-            echo '<button type="button" class="button button-primary view-survey-details" data-postid="' . $post_id . '">Lihat Jawaban</button>';
-            break;
+// 1. Mulai Sesi PHP jika belum ada
+if ( ! function_exists('doran_survey_start_session') ) {
+    function doran_survey_start_session() {
+        if ( ! session_id() ) {
+            session_start();
+        }
     }
 }
-add_action('manage_survey_submission_posts_custom_column', 'custom_survey_submission_column_data', 10, 2);
+add_action('init', 'doran_survey_start_session', 1);
+
+// 2. Definisikan CPT untuk menyimpan hasil survei
+if ( ! function_exists('doran_survey_register_submission_cpt') ) {
+    function doran_survey_register_submission_cpt() {
+        // ... (Isi fungsi sama persis dengan kode v3.1 sebelumnya)
+        $args = array('labels' => array('name' => 'Hasil Survei', 'singular_name' => 'Hasil Survei', 'menu_name' => 'Doran Survey'), 'public' => false, 'show_ui' => true, 'show_in_menu' => true, 'menu_position' => 25, 'menu_icon' => 'dashicons-feedback', 'supports' => array('title'), 'capability_type' => 'post', 'capabilities' => array('create_posts' => false), 'map_meta_cap' => true);
+        register_post_type('survey_submission', $args);
+    }
+    add_action('init', 'doran_survey_register_submission_cpt');
+}
+
+// 3. Hapus Aksi Baris di Tabel Admin
+if ( ! function_exists('doran_survey_remove_row_actions') ) {
+    function doran_survey_remove_row_actions($actions, $post) {
+        if ($post->post_type === 'survey_submission') {
+            unset($actions['edit'], $actions['inline hide-if-no-js'], $actions['trash'], $actions['view']);
+        }
+        return $actions;
+    }
+    add_filter('post_row_actions', 'doran_survey_remove_row_actions', 10, 2);
+}
+
+// ... (Tambahkan if !function_exists untuk SEMUA fungsi global lainnya: remove_bulk_actions, set_custom_columns, dll.) ...
+
+// Di bawah ini saya sertakan lagi semua fungsi dengan pembungkus tersebut.
+
+if ( ! function_exists('doran_survey_remove_bulk_actions') ) {
+    function doran_survey_remove_bulk_actions($actions) {
+        unset($actions['edit'], $actions['trash']);
+        return $actions;
+    }
+    add_filter('bulk_actions-edit-survey_submission', 'doran_survey_remove_bulk_actions');
+}
+
+if ( ! function_exists('doran_survey_set_custom_columns') ) {
+    function doran_survey_set_custom_columns($columns) {
+        unset($columns['cb'], $columns['date'], $columns['title']);
+        $columns['customer_name']   = 'Nama Pelanggan';
+        $columns['customer_telp']   = 'No. Telepon';
+        $columns['survey_media']    = 'Media Pembelian';
+        $columns['submission_time'] = 'Waktu Submit';
+        $columns['actions']         = 'Tindakan';
+        return $columns;
+    }
+    add_filter('manage_survey_submission_posts_columns', 'doran_survey_set_custom_columns');
+}
+
+if ( ! function_exists('doran_survey_custom_column_data') ) {
+    function doran_survey_custom_column_data($column, $post_id) {
+        switch ($column) {
+            case 'customer_name': echo esc_html(get_post_meta($post_id, 'customer_nama', true)); break;
+            case 'customer_telp': echo esc_html(get_post_meta($post_id, 'customer_telp', true)); break;
+            case 'survey_media':
+                $media_id = intval(get_post_meta($post_id, 'survey_media', true));
+                $media_text = 'N/A';
+                if ($media_id == 1) $media_text = 'Offline'; elseif ($media_id == 2) $media_text = 'Online'; elseif ($media_id == 3) $media_text = 'Marketplace';
+                echo $media_text;
+                break;
+            case 'submission_time': echo get_the_date('d-m-Y H:i:s', $post_id); break;
+            case 'actions': echo '<button type="button" class="button button-primary view-survey-details" data-postid="' . $post_id . '">Lihat Jawaban</button>'; break;
+        }
+    }
+    add_action('manage_survey_submission_posts_custom_column', 'doran_survey_custom_column_data', 10, 2);
+}
 
 function add_survey_details_modal_html() {
     global $post_type;
@@ -207,1323 +181,398 @@ function load_custom_admin_assets($hook) {
 add_action('admin_enqueue_scripts', 'load_custom_admin_assets');
 
 
+// Untuk mempersingkat, saya akan langsung ke shortcode utama. Prinsipnya sama, bungkus semua fungsi dalam 'if !function_exists'.
 
-function doran_survey_display_form_shortcode() {
-    // Gunakan output buffering untuk menangkap HTML
-    ob_start();
-
-    // === LOGIKA GET API DAN AUTOfILL ===
-
-    // 1. Cek apakah parameter 'ref' ada. Jika tidak, tampilkan pesan dan berhenti.
-    if ( empty( $_GET['ref'] ) ) {
-        echo '<p>Error: Link survei tidak valid atau tidak lengkap.</p>';
-        return ob_get_clean(); // Mengembalikan buffer dan menghentikan eksekusi
+if ( ! function_exists('get_doran_survey_questions') ) {
+    function get_doran_survey_questions() {
+        return [
+            'offline' => [
+            1 => [
+                'soal'          => 'Apakah kualitas produk yang Anda beli sesuai dengan deskripsi yang diberikan?', 
+                'jenis'         => 1, 
+                'tipe_tampilan' => 'teks',
+                'opsi'          => [1=>'Sangat Tidak Sesuai', 2=>'Tidak Sesuai', 3=>'Cukup Sesuai', 4=>'Sesuai', 5=>'Sangat Sesuai']
+            ],
+            2 => [
+                'soal'          => 'Bagaimana penilaian Anda terhadap harga produk di Doran Gadget?', 
+                'jenis'         => 1,
+                'tipe_tampilan' => 'teks',
+                'opsi'          => [1=>'Sangat Tidak Sesuai', 2=>'Tidak Sesuai', 3=>'Cukup Sesuai', 4=>'Sesuai', 5=>'Sangat Sesuai']
+            ],
+            3 => [
+                'soal'          => 'Bagaimana pelayanan tim SPG Doran Gadget saat Anda membutuhkan bantuan?', 
+                'jenis'         => 1,
+                'tipe_tampilan' => 'teks',
+                'opsi'          => [1=>'Sangat Tidak Sesuai', 2=>'Tidak Sesuai', 3=>'Cukup Sesuai', 4=>'Sesuai', 5=>'Sangat Sesuai']
+            ],
+            4 => [
+                'soal'          => 'Apakah metode pembayaran baik tunai maupun non-tunai yang disediakan sudah memenuhi kebutuhan Anda?', 
+                'jenis'         => 1,
+                'tipe_tampilan' => 'emoji',
+                'opsi'          => [
+                    // Setiap opsi sekarang adalah array yang berisi 'url' dan 'label'
+                    1 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f621/512.gif', 'label' => 'Sangat Buruk'],
+                    2 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/2639_fe0f/512.gif', 'label' => 'Buruk'],
+                    3 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f610/512.gif', 'label' => 'Cukup'],
+                    4 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f60a/512.gif', 'label' => 'Bagus'],
+                    5 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f600/512.gif', 'label' => 'Sangat Bagus']
+                ]
+            ],
+            5 => [
+                'soal'          => 'Bagaimana dengan layanan experience store dimana konsumen mencoba langsung produk yang akan dibeli di toko?', 
+                'jenis'         => 1,
+                'tipe_tampilan' => 'emoji',
+                'opsi'          => [
+                    // Setiap opsi sekarang adalah array yang berisi 'url' dan 'label'
+                    1 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f621/512.gif', 'label' => 'Sangat Buruk'],
+                    2 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/2639_fe0f/512.gif', 'label' => 'Buruk'],
+                    3 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f610/512.gif', 'label' => 'Cukup'],
+                    4 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f60a/512.gif', 'label' => 'Bagus'],
+                    5 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f600/512.gif', 'label' => 'Sangat Bagus']
+                ]
+            ],
+            6 => [
+                'soal'          => 'Bagaimana pengalaman Anda secara keseluruhan saat berbelanja di Doran Gadget?', 
+                'jenis'         => 1,
+                'tipe_tampilan' => 'emoji',
+                'opsi'          => [
+                    // Setiap opsi sekarang adalah array yang berisi 'url' dan 'label'
+                    1 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f621/512.gif', 'label' => 'Sangat Buruk'],
+                    2 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/2639_fe0f/512.gif', 'label' => 'Buruk'],
+                    3 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f610/512.gif', 'label' => 'Cukup'],
+                    4 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f60a/512.gif', 'label' => 'Bagus'],
+                    5 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f600/512.gif', 'label' => 'Sangat Bagus']
+                ]
+            ],
+            7 => [
+                'soal'          => 'Seberapa besar kemungkinan Anda merekomendasikan Doran Gadget kepada orang lain?', 
+                'jenis'         => 1,
+                'tipe_tampilan' => 'teks',
+                'opsi'          => [1=>'Sangat Tidak Mungkin', 2=>'Tidak Mungkin', 3=>'Mungkin', 4=>'Sangat Mungkin', 5=>'Pasti Merekomendasikan'] // Label lebih sesuai
+            ],
+            8 => [
+                'soal'  => 'Apa Masukan Anda untuk Doran Gadget untuk lebih baik ke depannya? Tuliskan Jawaban Anda!', 
+                'jenis' => 2 
+            ]
+        ],
+        'online' => [
+            1 => [
+                'soal' => 'Seberapa cepat website/aplikasi Doran Gadget dalam memuat halaman atau produk yang Anda inginkan?', 
+                'jenis' => 1, 
+                'tipe_tampilan' => 'teks',
+                'opsi' => [1=>'Sangat Lambat', 2=>'Lambat', 3=>'Cukup Cepat', 4=>'Cepat', 5=>'Sangat Cepat']
+            ],
+            2 => [
+                'soal' => 'Bagaimana dengan garansi produk yang diberikan oleh Doran Gadget untuk produk yang dibeli?', 
+                'jenis' => 1, 
+                'tipe_tampilan' => 'teks',
+                'opsi' => [1=>'Sangat Tidak Jelas', 2=>'Tidak Jelas', 3=>'Cukup Jelas', 4=>'Jelas', 5=>'Sangat Jelas']
+            ],
+            3 => [
+                'soal' => 'Apakah metode pembayaran yang tersedia di website/aplikasi Doran Gadget memenuhi kebutuhan Anda?', 
+                'jenis' => 1, 
+                'tipe_tampilan' => 'teks',
+                'opsi' => [1=>'Sangat Tidak Lengkap', 2=>'Tidak Lengkap', 3=>'Cukup Lengkap', 4=>'Lengkap', 5=>'Sangat Lengkap']
+            ],
+            4 => [
+                'soal' => 'Bagaimana penilaian Anda terhadap proses navigasi hingga checkout di website atau aplikasi Doran Gadget?', 
+                'jenis' => 1, 
+                'tipe_tampilan' => 'teks',
+                'opsi' => [1=>'Sangat Sulit', 2=>'Sulit', 3=>'Cukup Mudah', 4=>'Mudah', 5=>'Sangat Mudah']
+            ],
+            5 => [
+                'soal' => 'Bagaimana pelayanan customer service Doran Gadget saat Anda membutuhkan bantuan?', 
+                'jenis' => 1, 
+                'tipe_tampilan' => 'emoji',
+                'opsi'          => [
+                    // Setiap opsi sekarang adalah array yang berisi 'url' dan 'label'
+                    1 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f621/512.gif', 'label' => 'Sangat Buruk'],
+                    2 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/2639_fe0f/512.gif', 'label' => 'Buruk'],
+                    3 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f610/512.gif', 'label' => 'Cukup'],
+                    4 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f60a/512.gif', 'label' => 'Bagus'],
+                    5 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f600/512.gif', 'label' => 'Sangat Bagus']
+                ]
+            ],
+            6 => [
+                'soal' => 'Seberapa besar kemungkinan Anda merekomendasikan untuk berbelanja di Doran Gadget melalui website atau aplikasi kepada orang lain?', 
+                'jenis' => 1, 
+                'tipe_tampilan' => 'teks',
+                'opsi' => [1=>'Sangat Kecil', 2=>'Kecil', 3=>'Cukup', 4=>'Besar', 5=>'Sangat Besar']
+            ],
+            7 => [
+                'soal' => 'Apa Masukan Anda untuk Doran Gadget (Online) untuk lebih baik ke depannya? Tuliskan Jawaban Anda!', 
+                'jenis' => 2
+            ]
+        ],
+        'marketplace' => [
+            1 => [
+                'soal' => 'Seberapa mudah navigasi Anda menemukan produk yang dicari di Doran Gadget melalui marketplace?', 
+                'jenis' => 1, 
+                'tipe_tampilan' => 'teks',
+                'opsi' => [1=>'Sangat Sulit', 2=>'Sulit', 3=>'Cukup Mudah', 4=>'Mudah', 5=>'Sangat Mudah']
+            ],
+            2 => [
+                'soal' => 'Apakah metode pembayaran yang tersedia di Marketplace Doran Gadget memenuhi kebutuhan Anda?', 
+                'jenis' => 1, 
+                'tipe_tampilan' => 'teks',
+                'opsi' => [1=>'Sangat Tidak Lengkap', 2=>'Tidak Lengkap', 3=>'Cukup Lengkap', 4=>'Lengkap', 5=>'Sangat Lengkap']
+            ],
+            3 => [
+                'soal' => 'Seberapa besar kemungkinan Anda merekomendasikan untuk berbelanja di Doran Gadget melalui marketplace kepada orang lain?', 
+                'jenis' => 1, 
+                'tipe_tampilan' => 'teks',
+                'opsi' => [1=>'Sangat Kecil', 2=>'Kecil', 3=>'Cukup', 4=>'Besar', 5=>'Sangat Besar']
+            ],
+            4 => [
+                'soal' => 'Bagaimana dengan garansi produk yang diberikan oleh Doran Gadget untuk produk yang dibeli?', 
+                'jenis' => 1, 
+                'tipe_tampilan' => 'emoji',
+                'opsi'          => [
+                    // Setiap opsi sekarang adalah array yang berisi 'url' dan 'label'
+                    1 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f621/512.gif', 'label' => 'Sangat Buruk'],
+                    2 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/2639_fe0f/512.gif', 'label' => 'Tidak Buruk'],
+                    3 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f610/512.gif', 'label' => 'Cukup'],
+                    4 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f60a/512.gif', 'label' => 'Bagus'],
+                    5 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f600/512.gif', 'label' => 'Sangat Bagus']
+                ]
+            ],
+            5 => [
+                'soal' => 'Bagaimana pengalaman Anda dengan packing produk yang dibeli?', 
+                'jenis' => 1, 
+                'tipe_tampilan' => 'emoji',
+                'opsi'          => [
+                    // Setiap opsi sekarang adalah array yang berisi 'url' dan 'label'
+                    1 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f621/512.gif', 'label' => 'Sangat Buruk'],
+                    2 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/2639_fe0f/512.gif', 'label' => 'Tidak Buruk'],
+                    3 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f610/512.gif', 'label' => 'Cukup'],
+                    4 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f60a/512.gif', 'label' => 'Bagus'],
+                    5 => ['url' => 'https://fonts.gstatic.com/s/e/notoemoji/latest/1f600/512.gif', 'label' => 'Sangat Bagus']
+                ]
+            ],
+            6 => [
+                'soal' => 'Apa Masukan Anda untuk Doran Gadget (Marketplace) untuk lebih baik ke depannya? Tuliskan Jawaban Anda!', 
+                'jenis' => 2
+            ]
+        ]
+        ];
     }
-
-    // 2. Ambil dan bersihkan parameter 'ref'
-    $ref = sanitize_text_field( $_GET['ref'] );
-
-    // 3. Buat parameter 'base'
-    $base = md5( date('Y-m-d') . '_ord_' . $ref );
-
-    // 4. Lakukan request GET API
-    $api_url = sprintf('https://kasir.doran.id/api/product/detail_order?base=e55c758095b2361eede2cc07627e6555&ref=NTczNDIxMQ==');
-    $response = wp_remote_get( $api_url );
-
-    // Inisialisasi variabel autofill
-    $nama = '';
-    $telp = '';
-    $email = '';
-    $domisili = '';
-    $error_message = '';
-    
-    if ( is_wp_error( $response ) ) {
-        $error_message = 'Gagal terhubung ke server. Silakan coba lagi nanti.';
-    } else {
-        $body = wp_remote_retrieve_body( $response );
-        $data = json_decode( $body, true );
-
-        if ( ! $data || $data['status'] != 'true' ) {
-            $error_message = 'Data transaksi tidak ditemukan. Pastikan link survei Anda benar.';
-        } else {
-            // Isi variabel dari response API
-            $detail = $data['data'];
-            $nama = esc_attr( $detail['xx_nama_pelanggan'] );
-            $telp = esc_attr( $detail['xx_telp_pelanggan'] );
-            $email = esc_attr( $detail['xx_email'] );
-            $domisili = esc_attr( $detail['xx_alamat_pelanggan'] );
-        }
-    }
-    
-    // Jika ada error, tampilkan dan berhenti
-    if ( ! empty( $error_message ) ) {
-        echo '<p>' . esc_html( $error_message ) . '</p>';
-        return ob_get_clean();
-    }
-
-    // === TAMPILKAN HTML FORM ===
-    ?>
-<div id="doran-survey-container">
-    <form id="doran-survey-form" action="<?php echo esc_url( admin_url('admin-post.php') ); ?>" method="post">
-
-        <input type="hidden" name="action" value="submit_doran_survey">
-        <input type="hidden" name="survey_ref" value="<?php echo esc_attr( $ref ); ?>">
-        <?php wp_nonce_field( 'doran_survey_action', 'doran_survey_nonce' ); ?>
-
-
-
-        <h3>Data Anda</h3>
-        <div class="data-diri-atas">
-            <div class="form-group">
-                <label for="nama">Nama</label>
-                <input type="text" id="nama" name="customer_nama" value="<?php echo $nama; ?>" readonly required>
-            </div>
-            <div class="form-group">
-                <label for="telp">No. Telepon</label>
-                <input type="text" id="telp" name="customer_telp" value="<?php echo $telp; ?>" readonly required>
-            </div>
-        </div>
-
-        <div class="data-diri-bawah">
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="customer_email" value="<?php echo $email; ?>"
-                    <?php echo empty($email) ? '' : 'readonly'; ?> required>
-            </div>
-            <div class="form-group">
-                <label for="domisili">Domisili</label>
-                <input type="text" id="domisili" name="customer_domisili" value="<?php echo $domisili; ?>"
-                    <?php echo empty($domisili) ? '' : 'readonly'; ?> required>
-            </div>
-        </div>
-
-
-
-        <hr>
-        <h3>Form Survei</h3>
-
-        <div class="form-group">
-            <label for="media-selector">Di mana Anda melakukan pembelian?</label>
-            <select id="media-selector" name="survey_media" required>
-                <option value="">-- Pilih Lokasi Pembelian --</option>
-                <option value="1">Store Offline (Mall / Toko)</option>
-                <option value="2">Website / Aplikasi Doran Gadget</option>
-                <option value="3">Marketplace (Tokopedia, Shopee, dll.)</option>
-            </select>
-        </div>
-
-        <div id="questions-for-1" class="question-set" style="display:none;">
-            <h4>Pertanyaan Khusus Store Offline</h4>
-
-            <!--  Offline Q1  -->
-            <div class="form-group">
-                <label>1. Apakah kualitas produk yang Anda beli sesuai dengan deskripsi yang diberikan?</label>
-                <div class="rating-scale-group">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][0][jawab]" value="1" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">1</span>
-                        <span class="rating-text">Sangat Tidak Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[offline][0][opsi][1]" value="Sangat Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][0][jawab]" value="2" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">2</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[offline][0][opsi][2]" value="Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][0][jawab]" value="3" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">3</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[offline][0][opsi][3]" value="Cukup Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][0][jawab]" value="4" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">4</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[offline][0][opsi][4]" value="Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][0][jawab]" value="5" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">5</span>
-                        <span class="rating-text">Sangat Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[offline][0][opsi][5]" value="Sangat Sesuai">
-
-                </div>
-                <input type="hidden" name="survey_data[offline][0][soal]"
-                    value="Apakah kualitas produk yang Anda beli sesuai dengan deskripsi yang diberikan?">
-                <input type="hidden" name="survey_data[offline][0][jenis]" value="1">
-            </div>
-
-            <!--  Offline Q2  -->
-            <div class="form-group">
-                <label>2. Bagaimana penilaian Anda terhadap harga produk di Doran Gadget?</label>
-                <div class="rating-scale-group">
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][1][jawab]" value="1" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">1</span>
-                        <span class="rating-text">Sangat Tidak Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[offline][1][opsi][1]" value="Sangat Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][1][jawab]" value="2" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">2</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[offline][1][opsi][2]" value="Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][1][jawab]" value="3" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">3</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[offline][1][opsi][3]" value="Cukup Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][1][jawab]" value="4" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">4</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[offline][1][opsi][4]" value="Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][1][jawab]" value="5" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">5</span>
-                        <span class="rating-text">Sangat Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[offline][1][opsi][5]" value="Sangat Sesuai">
-
-                </div>
-                <input type="hidden" name="survey_data[offline][1][soal]"
-                    value="Bagaimana penilaian Anda terhadap harga produk di Doran Gadget?">
-                <input type="hidden" name="survey_data[offline][1][jenis]" value="1">
-            </div>
-
-            <!--  Offline Q3  -->
-            <div class="form-group">
-                <label>3. Bagaimana pelayanan tim SPG Doran Gadget saat Anda membutuhkan bantuan?</label>
-                <div class="rating-scale-group">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][2][jawab]" value="1" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">1</span>
-                        <span class="rating-text">Sangat Tidak Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[offline][2][opsi][1]" value="Sangat Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][2][jawab]" value="2" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">2</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[offline][2][opsi][2]" value="Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][2][jawab]" value="3" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">3</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[offline][2][opsi][3]" value="Cukup Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][2][jawab]" value="4" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">4</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[offline][2][opsi][4]" value="Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][2][jawab]" value="5" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">5</span>
-                        <span class="rating-text">Sangat Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[offline][2][opsi][5]" value="Sangat Sesuai">
-
-                </div>
-                <input type="hidden" name="survey_data[offline][2][soal]"
-                    value="Bagaimana pelayanan tim SPG Doran Gadget saat Anda membutuhkan bantuan?">
-                <input type="hidden" name="survey_data[offline][2][jenis]" value="1">
-            </div>
-
-            <!--  Offline Q4  -->
-            <div class="form-group">
-                <label>4. Apakah metode pembayaran baik tunai maupun non-tunai yang disediakan sudah memenuhi kebutuhan
-                    Anda?</label>
-                <div class="rating-scale-group">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][3][jawab]" value="1" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">
-                            <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f621/512.gif" alt="😡" width="32"
-                                height="32">
-                        </span>
-                        <span class="rating-text">Sangat Tidak Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[offline][3][opsi][1]" value="Sangat Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][3][jawab]" value="2" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">
-                            <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/2639_fe0f/512.gif" alt="☹"
-                                width="32" height="32">
-                        </span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[offline][3][opsi][2]" value="Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][3][jawab]" value="3" class="survey-input"
-                            disabled>
-                        <span class="rating-circle"><img
-                                src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f610/512.gif" alt="😐" width="32"
-                                height="32"></span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[offline][3][opsi][3]" value="Cukup Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][3][jawab]" value="4" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">
-                            <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f60a/512.gif" alt="😊" width="32"
-                                height="32">
-                        </span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[offline][3][opsi][4]" value="Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][3][jawab]" value="5" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">
-                            <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f600/512.gif" alt="😀" width="32"
-                                height="32">
-                        </span>
-                        <span class="rating-text">Sangat Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[offline][3][opsi][5]" value="Sangat Sesuai">
-
-                </div>
-                <input type="hidden" name="survey_data[offline][3][soal]"
-                    value="Apakah metode pembayaran baik tunai maupun non-tunai yang disediakan sudah memenuhi kebutuhan Anda?">
-                <input type="hidden" name="survey_data[offline][3][jenis]" value="1">
-            </div>
-
-            <!--  Offline Q5  -->
-            <div class="form-group">
-                <label>5. Apakah Anda merasa terbantu dengan layanan experience store dimana konsumen mencoba langsung
-                    produk yang akan dibeli di toko?
-                    Anda?</label>
-                <div class="rating-scale-group">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][4][jawab]" value="1" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">
-                            <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f621/512.gif" alt="😡" width="32"
-                                height="32">
-                        </span>
-                        <span class="rating-text">Sangat Tidak Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[offline][4][opsi][1]" value="Sangat Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][4][jawab]" value="2" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">
-                            <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/2639_fe0f/512.gif" alt="☹"
-                                width="32" height="32">
-                        </span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[offline][4][opsi][2]" value="Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][4][jawab]" value="3" class="survey-input"
-                            disabled>
-                        <span class="rating-circle"><img
-                                src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f610/512.gif" alt="😐" width="32"
-                                height="32"></span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[offline][4][opsi][3]" value="Cukup Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][4][jawab]" value="4" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">
-                            <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f60a/512.gif" alt="😊" width="32"
-                                height="32">
-                        </span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[offline][4][opsi][4]" value="Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][4][jawab]" value="5" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">
-                            <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f600/512.gif" alt="😀" width="32"
-                                height="32">
-                        </span>
-                        <span class="rating-text">Sangat Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[offline][4][opsi][5]" value="Sangat Sesuai">
-
-                </div>
-                <input type="hidden" name="survey_data[offline][4][soal]"
-                    value="Apakah Anda merasa terbantu dengan layanan experience store dimana konsumen mencoba langsung produk yang akan dibeli di toko?">
-                <input type="hidden" name="survey_data[offline][4][jenis]" value="1">
-            </div>
-
-            <!--  Offline Q6  -->
-            <div class="form-group">
-                <label>6. Bagaimana pengalaman Anda secara keseluruhan saat berbelanja di Doran Gadget?</label>
-                <div class="rating-scale-group">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][5][jawab]" value="1" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">
-                            <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f621/512.gif" alt="😡" width="32"
-                                height="32">
-                        </span>
-                        <span class="rating-text">Sangat Tidak Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[offline][5][opsi][1]" value="Sangat Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][5][jawab]" value="2" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">
-                            <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/2639_fe0f/512.gif" alt="☹"
-                                width="32" height="32">
-                        </span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[offline][5][opsi][2]" value="Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][5][jawab]" value="3" class="survey-input"
-                            disabled>
-                        <span class="rating-circle"><img
-                                src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f610/512.gif" alt="😐" width="32"
-                                height="32"></span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[offline][5][opsi][3]" value="Cukup Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][5][jawab]" value="4" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">
-                            <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f60a/512.gif" alt="😊" width="32"
-                                height="32">
-                        </span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[offline][5][opsi][4]" value="Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][5][jawab]" value="5" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">
-                            <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f600/512.gif" alt="😀" width="32"
-                                height="32">
-                        </span>
-                        <span class="rating-text">Sangat Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[offline][5][opsi][5]" value="Sangat Sesuai">
-
-                </div>
-                <input type="hidden" name="survey_data[offline][5][soal]"
-                    value="Bagaimana pengalaman Anda secara keseluruhan saat berbelanja di Doran Gadget?">
-                <input type="hidden" name="survey_data[offline][5][jenis]" value="1">
-            </div>
-
-            <!--  Offline Q7  -->
-            <div class="form-group">
-                <label>7. Seberapa besar kemungkinan Anda merekomendasikan Doran Gadget kepada orang lain?</label>
-                <div class="rating-scale-group">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][6][jawab]" value="1" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">1</span>
-                        <span class="rating-text">Sangat Tidak Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[offline][6][opsi][1]" value="Sangat Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][6][jawab]" value="2" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">2</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[offline][6][opsi][2]" value="Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][6][jawab]" value="3" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">3</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[offline][6][opsi][3]" value="Cukup Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][6][jawab]" value="4" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">4</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[offline][6][opsi][4]" value="Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[offline][6][jawab]" value="5" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">5</span>
-                        <span class="rating-text">Sangat Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[offline][6][opsi][5]" value="Sangat Sesuai">
-
-                </div>
-                <input type="hidden" name="survey_data[offline][6][soal]"
-                    value="Seberapa besar kemungkinan Anda merekomendasikan Doran Gadget kepada orang lain?">
-                <input type="hidden" name="survey_data[offline][6][jenis]" value="1">
-            </div>
-
-            <!--  Offline Q8  -->
-            <div class="form-group">
-                <label>8. Apa Masukan Anda untuk Doran Gadget untuk lebih baik ke depannya? Tuliskan Jawaban
-                    Anda!</label>
-                <textarea name="survey_data[offline][7][jawab]" class="survey-input" rows=5 disabled></textarea>
-                <input type="hidden" name="survey_data[offline][7][soal]"
-                    value="Apa Masukan Anda untuk Doran Gadget untuk lebih baik ke depannya? Tuliskan Jawaban Anda!">
-                <input type="hidden" name="survey_data[offline][7][jenis]" value="2">
-            </div>
-        </div>
-
-        <div id="questions-for-2" class="question-set" style="display:none;">
-            <h4>Pertanyaan Khusus Website / Aplikasi Doran Gadget</h4>
-            <!--  online Q1  -->
-            <div class="form-group">
-                <label>1. Seberapa cepat website/aplikasi Doran Gadget dalam memuat halaman atau produk yang Anda
-                    inginkan?</label>
-                <div class="rating-scale-group">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][0][jawab]" value="1" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">1</span>
-                        <span class="rating-text">Sangat Tidak Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[online][0][opsi][1]" value="Sangat Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][0][jawab]" value="2" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">2</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[online][0][opsi][2]" value="Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][0][jawab]" value="3" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">3</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[online][0][opsi][3]" value="Cukup Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][0][jawab]" value="4" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">4</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[online][0][opsi][4]" value="Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][0][jawab]" value="5" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">5</span>
-                        <span class="rating-text">Sangat Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[online][0][opsi][5]" value="Sangat Sesuai">
-
-                </div>
-                <input type="hidden" name="survey_data[online][0][soal]"
-                    value="Seberapa cepat website/aplikasi Doran Gadget dalam memuat halaman atau produk yang Anda inginkan?">
-                <input type="hidden" name="survey_data[online][0][jenis]" value="1">
-            </div>
-
-            <!--  online Q2  -->
-            <div class="form-group">
-                <label>2. Bagaimana dengan garansi produk yang diberikan oleh Doran Gadget untuk produk yang
-                    dibeli?</label>
-                <div class="rating-scale-group">
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][1][jawab]" value="1" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">1</span>
-                        <span class="rating-text">Sangat Tidak Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[online][1][opsi][1]" value="Sangat Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][1][jawab]" value="2" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">2</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[online][1][opsi][2]" value="Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][1][jawab]" value="3" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">3</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[online][1][opsi][3]" value="Cukup Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][1][jawab]" value="4" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">4</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[online][1][opsi][4]" value="Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][1][jawab]" value="5" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">5</span>
-                        <span class="rating-text">Sangat Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[online][1][opsi][5]" value="Sangat Sesuai">
-
-                </div>
-                <input type="hidden" name="survey_data[online][1][soal]"
-                    value="Bagaimana dengan garansi produk yang diberikan oleh Doran Gadget untuk produk yang dibeli?">
-                <input type="hidden" name="survey_data[online][1][jenis]" value="1">
-            </div>
-
-            <!--  online Q3  -->
-            <div class="form-group">
-                <label>3. Apakah metode pembayaran yang tersedia di website/aplikasi Doran Gadget memenuhi kebutuhan
-                    Anda?</label>
-                <div class="rating-scale-group">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][2][jawab]" value="1" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">1</span>
-                        <span class="rating-text">Sangat Tidak Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[online][2][opsi][1]" value="Sangat Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][2][jawab]" value="2" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">2</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[online][2][opsi][2]" value="Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][2][jawab]" value="3" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">3</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[online][2][opsi][3]" value="Cukup Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][2][jawab]" value="4" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">4</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[online][2][opsi][4]" value="Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][2][jawab]" value="5" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">5</span>
-                        <span class="rating-text">Sangat Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[online][2][opsi][5]" value="Sangat Sesuai">
-
-                </div>
-                <input type="hidden" name="survey_data[online][2][soal]"
-                    value="Apakah metode pembayaran yang tersedia di website/aplikasi Doran Gadget memenuhi kebutuhan Anda?">
-                <input type="hidden" name="survey_data[online][2][jenis]" value="1">
-            </div>
-
-            <!--  online Q4  -->
-            <div class="form-group">
-                <label>4. Bagaimana penilaian Anda terhadap proses navigasi hingga checkout di website atau aplikasi
-                    Doran Gadget?</label>
-                <div class="rating-scale-group">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][3][jawab]" value="1" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">1</span>
-                        <span class="rating-text">Sangat Tidak Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[online][3][opsi][1]" value="Sangat Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][3][jawab]" value="2" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">2</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[online][3][opsi][2]" value="Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][3][jawab]" value="3" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">3</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[online][3][opsi][3]" value="Cukup Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][3][jawab]" value="4" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">4</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[online][3][opsi][4]" value="Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][3][jawab]" value="5" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">5</span>
-                        <span class="rating-text">Sangat Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[online][3][opsi][5]" value="Sangat Sesuai">
-
-                </div>
-                <input type="hidden" name="survey_data[online][3][soal]"
-                    value="Bagaimana penilaian Anda terhadap proses navigasi hingga checkout di website atau aplikasi Doran Gadget?">
-                <input type="hidden" name="survey_data[online][3][jenis]" value="1">
-            </div>
-
-            <!--  online Q5  -->
-            <div class="form-group">
-                <label>5. Bagaimana pelayanan customer service Doran Gadget saat Anda membutuhkan bantuan?</label>
-                <div class="rating-scale-group">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][4][jawab]" value="1" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">
-                            <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f621/512.gif" alt="😡" width="32"
-                                height="32">
-                        </span>
-                        <span class="rating-text">Sangat Tidak Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[online][4][opsi][1]" value="Sangat Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][4][jawab]" value="2" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">
-                            <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/2639_fe0f/512.gif" alt="☹"
-                                width="32" height="32">
-                        </span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[online][4][opsi][2]" value="Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][4][jawab]" value="3" class="survey-input"
-                            disabled>
-                        <span class="rating-circle"><img
-                                src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f610/512.gif" alt="😐" width="32"
-                                height="32"></span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[online][4][opsi][3]" value="Cukup Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][4][jawab]" value="4" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">
-                            <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f60a/512.gif" alt="😊" width="32"
-                                height="32">
-                        </span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[online][4][opsi][4]" value="Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][4][jawab]" value="5" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">
-                            <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f600/512.gif" alt="😀" width="32"
-                                height="32">
-                        </span>
-                        <span class="rating-text">Sangat Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[online][4][opsi][5]" value="Sesuai">
-
-                </div>
-                <input type="hidden" name="survey_data[online][4][soal]"
-                    value="Bagaimana pelayanan customer service Doran Gadget saat Anda membutuhkan bantuan?">
-                <input type="hidden" name="survey_data[online][4][jenis]" value="1">
-            </div>
-
-            <!--  online Q6  -->
-            <div class="form-group">
-                <label>6. Seberapa besar kemungkinan Anda merekomendasikan untuk berbelanja di Doran Gadget melalui
-                    website atau aplikasi kepada orang lain?</label>
-                <div class="rating-scale-group">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][5][jawab]" value="1" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">1</span>
-                        <span class="rating-text">Sangat Tidak Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[online][5][opsi][1]" value="Sangat Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][5][jawab]" value="2" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">2</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[online][5][opsi][2]" value="Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][5][jawab]" value="3" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">3</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[online][5][opsi][3]" value="Cukup Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][5][jawab]" value="4" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">4</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[online][5][opsi][4]" value="Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[online][5][jawab]" value="5" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">5</span>
-                        <span class="rating-text">Sangat Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[online][5][opsi][5]" value="Sangat Sesuai">
-
-                </div>
-                <input type="hidden" name="survey_data[online][5][soal]"
-                    value="Seberapa besar kemungkinan Anda merekomendasikan Doran Gadget kepada orang lain?">
-                <input type="hidden" name="survey_data[online][5][jenis]" value="1">
-            </div>
-
-            <!--  online Q7  -->
-            <div class="form-group">
-                <label>7. Apa Masukan Anda untuk Doran Gadget untuk lebih baik ke depannya? Tuliskan Jawaban
-                    Anda!</label>
-                <textarea name="survey_data[online][6][jawab]" class="survey-input" rows=5 disabled></textarea>
-                <input type="hidden" name="survey_data[online][6][soal]"
-                    value="Apa Masukan Anda untuk Doran Gadget untuk lebih baik ke depannya? Tuliskan Jawaban Anda!">
-                <input type="hidden" name="survey_data[online][6][jenis]" value="2">
-            </div>
-        </div>
-
-        <div id="questions-for-3" class="question-set" style="display:none;">
-            <h4>Pertanyaan Khusus Belanja di Marketplace</h4>
-            <!--  marketplace Q1  -->
-            <div class="form-group">
-                <label>1. Seberapa mudah navigasi Anda menemukan produk yang dicari di Doran Gadget melalui
-                    marketplace?</label>
-                <div class="rating-scale-group">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[marketplace][0][jawab]" value="1" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">1</span>
-                        <span class="rating-text">Sangat Tidak Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[marketplace][0][opsi][1]" value="Sangat Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[marketplace][0][jawab]" value="2" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">2</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[marketplace][0][opsi][2]" value="Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[marketplace][0][jawab]" value="3" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">3</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[marketplace][0][opsi][3]" value="Cukup Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[marketplace][0][jawab]" value="4" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">4</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[marketplace][0][opsi][4]" value="Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[marketplace][0][jawab]" value="5" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">5</span>
-                        <span class="rating-text">Sangat Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[marketplace][0][opsi][5]" value="Sangat Sesuai">
-
-                </div>
-                <input type="hidden" name="survey_data[marketplace][0][soal]" value="Seberapa mudah navigasi Anda menemukan produk yang dicari di Doran Gadget melalui
-                    marketplace?">
-                <input type="hidden" name="survey_data[marketplace][0][jenis]" value="1">
-            </div>
-
-            <!--  marketplace Q2  -->
-            <div class="form-group">
-                <label>2.Apakah metode pembayaran yang tersedia di Marketplace Doran Gadget memenuhi kebutuhan
-                    Anda?</label>
-                <div class="rating-scale-group">
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[marketplace][1][jawab]" value="1" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">1</span>
-                        <span class="rating-text">Sangat Tidak Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[marketplace][1][opsi][1]" value="Sangat Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[marketplace][1][jawab]" value="2" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">2</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[marketplace][1][opsi][2]" value="Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[marketplace][1][jawab]" value="3" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">3</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[marketplace][1][opsi][3]" value="Cukup Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[marketplace][1][jawab]" value="4" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">4</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[marketplace][1][opsi][4]" value="Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[marketplace][1][jawab]" value="5" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">5</span>
-                        <span class="rating-text">Sangat Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[marketplace][1][opsi][5]" value="Sangat Sesuai">
-
-                </div>
-                <input type="hidden" name="survey_data[marketplace][1][soal]" value="Apakah metode pembayaran yang tersedia di Marketplace Doran Gadget memenuhi kebutuhan
-                    Anda?">
-                <input type="hidden" name="survey_data[marketplace][1][jenis]" value="1">
-            </div>
-
-            <!--  marketplace Q3  -->
-            <div class="form-group">
-                <label>3.Seberapa besar kemungkinan Anda merekomendasikan untuk berbelanja di Doran Gadget melalui
-                    marketplace kepada orang lain?</label>
-                <div class="rating-scale-group">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[marketplace][2][jawab]" value="1" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">1</span>
-                        <span class="rating-text">Sangat Tidak Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[marketplace][2][opsi][1]" value="Sangat Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[marketplace][2][jawab]" value="2" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">2</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[marketplace][2][opsi][2]" value="Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[marketplace][2][jawab]" value="3" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">3</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[marketplace][2][opsi][3]" value="Cukup Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[marketplace][2][jawab]" value="4" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">4</span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[marketplace][2][opsi][4]" value="Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[marketplace][2][jawab]" value="5" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">5</span>
-                        <span class="rating-text">Sangat Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[marketplace][2][opsi][5]" value="Sangat Sesuai">
-
-                </div>
-                <input type="hidden" name="survey_data[marketplace][2][soal]" value="Seberapa besar kemungkinan Anda merekomendasikan untuk berbelanja di Doran Gadget melalui
-                    marketplace kepada orang lain?">
-                <input type="hidden" name="survey_data[marketplace][2][jenis]" value="1">
-            </div>
-
-
-            <!--  marketplace Q4  -->
-            <div class="form-group">
-                <label>4. Bagaimana dengan garansi produk yang diberikan oleh Doran Gadget untuk produk yang
-                    dibeli?</label>
-                <div class="rating-scale-group">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[marketplace][3][jawab]" value="1" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">
-                            <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f621/512.gif" alt="😡" width="32"
-                                height="32">
-                        </span>
-                        <span class="rating-text">Sangat Tidak Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[marketplace][3][opsi][1]" value="Sangat Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[marketplace][3][jawab]" value="2" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">
-                            <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/2639_fe0f/512.gif" alt="☹"
-                                width="32" height="32">
-                        </span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[marketplace][3][opsi][2]" value="Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[marketplace][3][jawab]" value="3" class="survey-input"
-                            disabled>
-                        <span class="rating-circle"><img
-                                src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f610/512.gif" alt="😐" width="32"
-                                height="32"></span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[marketplace][3][opsi][3]" value="Cukup Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[marketplace][3][jawab]" value="4" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">
-                            <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f60a/512.gif" alt="😊" width="32"
-                                height="32">
-                        </span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[marketplace][3][opsi][4]" value="Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[marketplace][3][jawab]" value="5" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">
-                            <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f600/512.gif" alt="😀" width="32"
-                                height="32">
-                        </span>
-                        <span class="rating-text">Sangat Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[marketplace][3][opsi][5]" value="Sangat Sesuai">
-
-                </div>
-                <input type="hidden" name="survey_data[marketplace][3][soal]" value="Bagaimana dengan garansi produk yang diberikan oleh Doran Gadget untuk produk yang
-                    dibeli?">
-                <input type="hidden" name="survey_data[marketplace][3][jenis]" value="1">
-            </div>
-
-            <!--  marketplace Q5  -->
-            <div class="form-group">
-                <label>5. Bagaimana dengan garansi produk yang diberikan oleh Doran Gadget untuk produk yang
-                    dibeli?</label>
-                <div class="rating-scale-group">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[marketplace][4][jawab]" value="1" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">
-                            <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f621/512.gif" alt="😡" width="32"
-                                height="32">
-                        </span>
-                        <span class="rating-text">Sangat Tidak Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[marketplace][4][opsi][1]" value="Sangat Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[marketplace][4][jawab]" value="2" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">
-                            <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/2639_fe0f/512.gif" alt="☹"
-                                width="32" height="32">
-                        </span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[marketplace][4][opsi][2]" value="Tidak Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[marketplace][4][jawab]" value="3" class="survey-input"
-                            disabled>
-                        <span class="rating-circle"><img
-                                src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f610/512.gif" alt="😐" width="32"
-                                height="32"></span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[marketplace][4][opsi][3]" value="Cukup Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[marketplace][4][jawab]" value="4" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">
-                            <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f60a/512.gif" alt="😊" width="32"
-                                height="32">
-                        </span>
-
-                    </label>
-                    <input type="hidden" name="survey_data[marketplace][4][opsi][4]" value="Sesuai">
-
-                    <label class="rating-label">
-                        <input type="radio" name="survey_data[marketplace][4][jawab]" value="5" class="survey-input"
-                            disabled>
-                        <span class="rating-circle">
-                            <img src="https://fonts.gstatic.com/s/e/notoemoji/latest/1f600/512.gif" alt="😀" width="32"
-                                height="32">
-                        </span>
-                        <span class="rating-text">Sangat Sesuai</span>
-                    </label>
-                    <input type="hidden" name="survey_data[marketplace][4][opsi][5]" value="Sangat Sesuai">
-
-                </div>
-                <input type="hidden" name="survey_data[marketplace][4][soal]"
-                    value="Bagaimana pengalaman Anda dengan packing produk yang dibeli?">
-                <input type="hidden" name="survey_data[marketplace][4][jenis]" value="1">
-            </div>
-
-
-            <!--  marketplace Q6  -->
-            <div class="form-group">
-                <label>6. Apa Masukan Anda untuk Doran Gadget untuk lebih baik ke depannya? Tuliskan Jawaban
-                    Anda!</label>
-                <textarea name="survey_data[marketplace][5][jawab]" class="survey-input" rows=5 disabled></textarea>
-                <input type="hidden" name="survey_data[marketplace][5][soal]"
-                    value="Apa Masukan Anda untuk Doran Gadget untuk lebih baik ke depannya? Tuliskan Jawaban Anda!">
-                <input type="hidden" name="survey_data[marketplace][5][jenis]" value="2">
-            </div>
-        </div>
-
-        <div class="form-group">
-            <button type="submit">Submit Survey</button>
-        </div>
-    </form>
-</div>
-<?php
-
-    // Mengembalikan semua output HTML
-    return ob_get_clean();
 }
-add_shortcode( 'doran_survey_form', 'doran_survey_display_form_shortcode' );
 
-function doran_survey_handle_form_submission() {
-    // wp_die('<pre>' . print_r($_POST, true) . '</pre>');
-    // 1. Keamanan: Cek Nonce
-    if ( ! isset( $_POST['doran_survey_nonce'] ) || ! wp_verify_nonce( $_POST['doran_survey_nonce'], 'doran_survey_action' ) ) {
-        wp_die('Verifikasi keamanan gagal. Silakan kembali dan coba lagi.');
-    }
+if ( ! function_exists('doran_multi_page_survey_shortcode') ) {
+    function doran_multi_page_survey_shortcode() {
+    ob_start();
+    $current_step = isset($_GET['step']) ? sanitize_key($_GET['step']) : 'start';
 
-    // 2. Ambil data dari form dan bersihkan
-    // $ref = sanitize_text_field( $_POST['survey_ref'] );
-    // $base = md5( date('Y-m-d') . '_ord_' . $ref );
-    $media = isset($_POST['survey_media']) ? intval($_POST['survey_media']) : 0;
-    $submitted_data = $_POST['survey_data']; 
+    global $doran_survey_data; // Siapkan variabel global untuk diakses template
 
-     // Ambil data pelanggan untuk disimpan di WP
-    $customer_nama = sanitize_text_field( $_POST['customer_nama'] );
-    $customer_telp = sanitize_text_field( $_POST['customer_telp'] );
-    $customer_email = sanitize_email( $_POST['customer_email'] );
+    if ($current_step === 'question') {
+        // Halaman pertanyaan: ambil semua data dari URL, BUKAN SESI
+        $media_id = isset($_GET['media']) ? intval($_GET['media']) : 0;
+        $question_number = isset($_GET['q']) ? intval($_GET['q']) : 1;
+        $ref = isset($_GET['ref']) ? sanitize_text_field($_GET['ref']) : '';
+        
+        // Kirim data ini ke template
+        $doran_survey_data = compact('media_id', 'question_number', 'ref');
 
-    // Ambil hanya set pertanyaan yang aktif sesuai media
-    $media_key = '';
-    if ($media === 1) $media_key = 'offline';
-    if ($media === 2) $media_key = 'online';
-    if ($media === 3) $media_key = 'marketplace';
-    
-    $active_questions = isset($submitted_data[$media_key]) ? $submitted_data[$media_key] : [];
+        include(plugin_dir_path(__FILE__) . 'templates/doran-survey-question.php');
 
-    //  wp_die('<p>Data yang akan di-loop ($active_questions):</p><pre>' . print_r($active_questions, true) . '</pre>');
-
-    // 3. Format ulang data survei sesuai spek API
-    $formatted_data = [];
-     $formatted_data = [];
-    if (!empty($active_questions)) {
-        foreach ($active_questions as $index => $item) {
-            if (isset($item['jawab']) && !empty($item['jawab'])) {
-                $jenis = isset($item['jenis']) ? intval($item['jenis']) : 0;
-                $soal = isset($item['soal']) ? sanitize_text_field($item['soal']) : '';
-                $jawab = ($jenis === 1) ? sanitize_text_field($item['jawab']) : sanitize_textarea_field($item['jawab']);
-                $opsi = isset($item['opsi']) && is_array($item['opsi']) ? array_map('sanitize_text_field', $item['opsi']) : [];
-
-                // Variabel $new_item sekarang PASTI terisi dengan benar
-                $new_item = [
-                    'urutan' => $index + 1,
-                    'jenis' => $jenis,
-                    'soal' => $soal,
-                    'jawab' => $jawab,
-                    'opsi' => $opsi,
-                ];
-                
-                $formatted_data[] = $new_item;
+    } elseif ($current_step === 'thank_you') {
+        include(plugin_dir_path(__FILE__) . 'templates/doran-survey-thankyou.php');
+    } else { // Default ke halaman 'start'
+        if (empty($_GET['ref'])) {
+            echo '<p>Error: Link survei tidak valid.</p>';
+        } else {
+            // Logika untuk halaman start (mengambil data dari API) tetap sama
+            $ref = sanitize_text_field($_GET['ref']);
+            $base = md5(date('Y-m-d') . '_ord_' . $ref);
+            // $api_url = sprintf('https://kasir.doran.id/api/product/detail_order?base=%s&ref=%s', $base, $ref);
+            $api_url = sprintf('https://kasir.doran.id/api/product/detail_order?base=f7d520bcc0907a0e39069cc979c101e3&ref=NTczNDIxMQ==');
+            $response = wp_remote_get($api_url);
+            if(is_wp_error($response)) { echo '<p>Gagal terhubung ke server.</p>'; }
+            else {
+                $body = wp_remote_retrieve_body($response);
+                $data = json_decode($body, true);
+                if (!$data || !isset($data['status']) || $data['status'] != 'true' || empty($data['data'])) {
+                    echo '<p>Data transaksi tidak ditemukan.</p>';
+                } else {
+                    $customer_data = $data['data'];
+                    $doran_survey_data = [
+                        'ref' => $ref,
+                        'customer' => [
+                            'nama'     => $customer_data['xx_nama_pelanggan'] ?? '',
+                            'telp'     => $customer_data['xx_telp_pelanggan'] ?? '',
+                            'email'    => $customer_data['xx_email'] ?? '',
+                            'domisili' => $customer_data['xx_alamat_pelanggan'] ?? '',
+                        ]
+                    ];
+                    include(plugin_dir_path(__FILE__) . 'templates/doran-survey-start.php');
+                }
             }
         }
     }
 
-    // Cek jika ada jawaban untuk disimpan
-    if ( ! empty( $formatted_data ) ) {
+    return ob_get_clean();
+}
+    add_shortcode('doran_survey_form', 'doran_multi_page_survey_shortcode');
+}
 
-        // Buat judul post yang deskriptif
-        $post_title = 'Survei dari ' . $customer_nama . ' pada ' . date('d-m-Y H:i');
 
-        // Siapkan data post
-        $post_data = array(
-            'post_title'   => $post_title,
-            'post_status'  => 'publish', // Langsung publish agar terlihat
-            'post_type'    => 'survey_submission', // Nama CPT yang kita daftarkan
-        );
+if ( ! function_exists('doran_survey_handle_step_submission') ) {
+    // function doran_survey_handle_step_submission() {
+    //     if (!isset($_POST['doran_survey_nonce']) || !wp_verify_nonce($_POST['doran_survey_nonce'], 'doran_survey_step_action')) { wp_die('Verifikasi keamanan gagal.'); }
+    //     $ref = sanitize_text_field($_POST['survey_ref']);
+    //     $current_step = sanitize_text_field($_POST['survey_step']);
 
         
-        // Masukkan post baru ke database dan dapatkan ID-nya
-        $post_id = wp_insert_post( $post_data );
+    // // echo '<div style="font-family: monospace; background: #f1f1f1; padding: 20px; border: 1px solid #ccc;">';
+    // // echo '<h1>DEBUG: Menangani Submit Form</h1>';
 
-        // if (!is_wp_error($post_id)) {  
-        //     // --- TAMBAHKAN KODE DEBUG INI ---
-        //     $debug_data_to_save = [
-        //         'ID Post yang Dibuat' => $post_id,
-        //         'Nama Pelanggan' => $customer_nama,
-        //         'Telepon Pelanggan' => $customer_telp,
-        //         'Email Pelanggan' => $customer_email,
-        //         'REF Transaksi' => $ref,
-        //         'ID Media' => $media,
-        //         'Data Jawaban' => $formatted_data
-        //     ];
-        //     wp_die('<p>Data yang akan disimpan ke database:</p><pre>' . print_r($debug_data_to_save, true) . '</pre>');
-        //     // ---------------------------------
+    // // echo '<h2>Data yang Dikirim dari Form (POST):</h2>';
+    // // echo '<pre>';
+    // // print_r($_POST);
+    // // echo '</pre>';
 
-        //     // Kode update_post_meta Anda ada di bawahnya
-        //     update_post_meta($post_id, 'customer_nama', $customer_nama);
-        //     // ...
-        // }
+    // // if ($current_step === 'start') {
+    // //     if (isset($_POST['survey_media']) && !empty($_POST['survey_media'])) {
+    // //         // Simpan media ke sesi
+    // //         $_SESSION['doran_customer_data']['media'] = intval($_POST['survey_media']);
 
-        // Jika post berhasil dibuat, simpan semua data lainnya sebagai custom fields (post meta)
-        if ( $post_id && ! is_wp_error( $post_id ) ) {
-            update_post_meta( $post_id, 'customer_nama', $customer_nama );
-            update_post_meta( $post_id, 'customer_telp', $customer_telp );
-            update_post_meta( $post_id, 'customer_email', $customer_email );
-            update_post_meta( $post_id, 'transaction_ref', $ref );
-            update_post_meta( $post_id, 'survey_media', $media );
-            
-            // Simpan semua jawaban survei dalam satu field (WordPress akan menanganinya sebagai array)
-            update_post_meta( $post_id, 'survey_answers', $submitted_data[$media_key] );
-        }
+    // //         echo '<h2>Data Sesi (SESSION) setelah pembaruan:</h2>';
+    // //         echo '<pre>';
+    // //         print_r($_SESSION);
+    // //         echo '</pre>';
+
+    // //         $page_url = home_url('/doran-survey/');
+    // //         $redirect_url = add_query_arg(['ref' => $ref, 'step' => 'question', 'q' => 1], $page_url);
+
+    // //         echo '<h2>Informasi Pengalihan (Redirect):</h2>';
+    // //         echo '<p>Jika tidak ada error, Anda seharusnya diarahkan ke URL ini:</p>';
+    // //         echo '<strong><a href="' . esc_url($redirect_url) . '">' . esc_html($redirect_url) . '</a></strong>';
+
+    // //     } else {
+    // //         echo '<h2><strong style="color:red;">ERROR:</strong></h2>';
+    // //         echo '<p>Field "survey_media" (pilihan lokasi pembelian) tidak terkirim atau kosong. Proses tidak bisa dilanjutkan.</p>';
+    // //     }
+    // // } else {
+    // //      echo '<h2><strong style="color:red;">ERROR:</strong></h2>';
+    // //      echo '<p>Langkah saat ini terdeteksi bukan "start". Step terdeteksi: ' . esc_html($current_step) . '</p>';
+    // // }
+
+    // // echo '</div>';
+    // // wp_die();
+
+    //     $page_url = home_url('/doran-survey/');
+    //     if (!isset($_SESSION['doran_survey_answers'])) $_SESSION['doran_survey_answers'] = [];
+    //     if (!isset($_SESSION['doran_customer_data'])) { wp_redirect($page_url . '?ref=' . $ref); exit; }
+        
+    //     $redirect_url = $page_url;
+    //     if ($current_step === 'start') {
+    //         $_SESSION['doran_customer_data']['media'] = intval($_POST['survey_media']);
+    //         $redirect_url = add_query_arg(['ref' => $ref, 'step' => 'question', 'q' => 1], $page_url);
+    //     } elseif ($current_step === 'question') {
+    //         $question_number = intval($_POST['question_number']);
+    //         if (isset($_POST['survey_answer'])) $_SESSION['doran_survey_answers'][$question_number] = wp_kses_post($_POST['survey_answer']);
+    //         $media = $_SESSION['doran_customer_data']['media'] ?? 0;
+    //         $media_key = $media == 1 ? 'offline' : ($media == 2 ? 'online' : 'marketplace');
+    //         $all_questions = get_doran_survey_questions();
+    //         $total_questions = count($all_questions[$media_key] ?? []);
+    //         $next_question_number = $question_number + 1;
+    //         if ($next_question_number <= $total_questions) {
+    //             $redirect_url = add_query_arg(['ref' => $ref, 'step' => 'question', 'q' => $next_question_number], $page_url);
+    //         } else {
+    //             doran_survey_process_final_submission($ref);
+    //             $redirect_url = add_query_arg(['ref' => $ref, 'step' => 'thank_you'], $page_url);
+    //         }
+    //     }
+    //     wp_redirect($redirect_url);
+    //     exit;
+    // }
+    function doran_survey_handle_step_submission() {
+    if (!isset($_POST['doran_survey_nonce']) || !wp_verify_nonce($_POST['doran_survey_nonce'], 'doran_survey_step_action')) {
+       wp_die('Verifikasi keamanan gagal.');
     }
 
-    // 5. Siapkan payload untuk POST API
-    $body_payload = [
-        'media' => $media,
-        'data'  => $formatted_data
-    ];
+    $ref = sanitize_text_field($_POST['survey_ref']);
+    $current_step = sanitize_text_field($_POST['survey_step']);
+    $page_url = home_url('/doran-survey/'); // Pastikan slug halaman Anda adalah 'doran-survey'
 
-    $api_url = sprintf( 'https://kasir.doran.id/api/product/submit?base=e55c758095b2361eede2cc07627e6555&ref=NTczNDIxMQ==');
-    
-    $response = wp_remote_post( $api_url, [
-        'method'    => 'POST',
-        'headers'   => ['Content-Type' => 'application/json; charset=utf-8'],
-        'body'      => json_encode( $body_payload ),
-        'data_format' => 'body',
-    ]);
-    
-    // 6. Redirect pengguna setelah submit
-    // Buat halaman "Terima Kasih" di WordPress dengan slug 'terima-kasih'
-    $redirect_url = home_url('/thank-you'); 
+    if (!session_id()) { session_start(); } // Sesi tetap dipakai untuk simpan jawaban, tapi tidak untuk logika utama
 
-    if ( is_wp_error( $response ) ) {
-        // Jika gagal, redirect dengan parameter error
-        $redirect_url = add_query_arg('submit_status', 'error', home_url('/doran-survey'));
-    } else {
-        $response_code = wp_remote_retrieve_response_code( $response );
-        if ($response_code !== 200) {
-            // Jika status tidak 200, anggap error
-            $error_body = wp_remote_retrieve_body($response);
-    wp_die(
-        'SUBMIT FAILED!<br>' .
-        'Response Code: ' . esc_html($response_code) . '<br><br>' .
-        'Response Body: <pre>' . esc_html($error_body) . '</pre>'
-    );
-            $redirect_url = add_query_arg('submit_status', 'failed', home_url('/doran-survey'));
+    $redirect_url = add_query_arg('ref', $ref, $page_url); // Default redirect jika ada masalah
+
+    if ($current_step === 'start') {
+        $media_id = intval($_POST['survey_media']);
+        // Simpan data customer ke sesi untuk proses final di akhir
+        $_SESSION['doran_customer_data_final'] = [
+            'nama'     => sanitize_text_field($_POST['customer_nama']),
+            'telp'     => sanitize_text_field($_POST['customer_telp']),
+            'email'    => sanitize_email($_POST['customer_email']),
+            'domisili' => sanitize_text_field($_POST['customer_domisili']),
+            'ref'      => $ref,
+            'media'    => $media_id
+        ];
+        $_SESSION['doran_survey_answers_final'] = []; // Kosongkan jawaban lama
+
+        // Redirect ke pertanyaan pertama DENGAN menyertakan parameter media
+        $redirect_url = add_query_arg(['ref' => $ref, 'step' => 'question', 'q' => 1, 'media' => $media_id], $page_url);
+
+    } 
+    elseif ($current_step === 'question') {
+        $question_number = intval($_POST['question_number']);
+        $media_id = intval($_POST['survey_media']); // Ambil media dari hidden input di form
+        
+        if (isset($_POST['survey_answer'])) {
+            $_SESSION['doran_survey_answers_final'][$question_number] = wp_kses_post($_POST['survey_answer']);
+        }
+        
+        $media_key = $media_id == 1 ? 'offline' : ($media_id == 2 ? 'online' : 'marketplace');
+        $all_questions = get_doran_survey_questions();
+        $total_questions = count($all_questions[$media_key] ?? []);
+        
+        $next_question_number = $question_number + 1;
+
+        if ($next_question_number <= $total_questions) {
+            // Arahkan ke pertanyaan berikutnya, oper lagi parameter media
+            $redirect_url = add_query_arg(['ref' => $ref, 'step' => 'question', 'q' => $next_question_number, 'media' => $media_id], $page_url);
         } else {
-            // Sukses
-            $redirect_url = add_query_arg('submit_status', 'success', home_url('/thank-you'));
+            doran_survey_process_final_submission($ref); // Proses data final dari sesi
+            $redirect_url = add_query_arg(['ref' => $ref, 'step' => 'thank_you'], $page_url);
         }
     }
     
-    wp_redirect( $redirect_url );
+    wp_redirect($redirect_url);
     exit;
 }
-// Hook untuk pengguna yang tidak login
-add_action( 'admin_post_nopriv_submit_doran_survey', 'doran_survey_handle_form_submission' );
-// Hook untuk pengguna yang login
-add_action( 'admin_post_submit_doran_survey', 'doran_survey_handle_form_submission' );
-?>
+    add_action('admin_post_nopriv_submit_doran_survey_step', 'doran_survey_handle_step_submission');
+    add_action('admin_post_submit_doran_survey_step', 'doran_survey_handle_step_submission');
+}
+
+if ( ! function_exists('doran_survey_process_final_submission') ) {
+    function doran_survey_process_final_submission($ref) {
+        if (empty($_SESSION['doran_customer_data']) || empty($_SESSION['doran_survey_answers'])) return;
+        $customer_data = $_SESSION['doran_customer_data'];
+        $answers_data = $_SESSION['doran_survey_answers'];
+        $media = $customer_data['media'] ?? 0;
+        $media_key = $media == 1 ? 'offline' : ($media == 2 ? 'online' : 'marketplace');
+        $all_questions = get_doran_survey_questions()[$media_key] ?? [];
+        $formatted_data_for_cpt = [];
+        foreach ($all_questions as $q_num => $q_details) {
+            $answer = isset($answers_data[$q_num]) ? $answers_data[$q_num] : '';
+            if (!empty($answer)) $formatted_data_for_cpt[] = ['soal' => $q_details['soal'], 'jawab' => $answer];
+        }
+        if (empty($formatted_data_for_cpt)) return;
+        $post_title = 'Survei dari ' . ($customer_data['nama'] ?? 'Unknown') . ' (' . $ref . ') pada ' . current_time('d-m-Y H:i');
+        $post_id = wp_insert_post(['post_title' => $post_title, 'post_status' => 'publish', 'post_type' => 'survey_submission']);
+        if ($post_id && !is_wp_error($post_id)) {
+            update_post_meta($post_id, 'customer_nama', $customer_data['nama'] ?? '');
+            update_post_meta($post_id, 'customer_telp', $customer_data['telp'] ?? '');
+            update_post_meta($post_id, 'survey_media', $media);
+            update_post_meta($post_id, 'survey_answers', $formatted_data_for_cpt);
+            update_post_meta($post_id, 'transaction_ref', $ref);
+        }
+        // ... (Kode wp_remote_post Anda yang dinonaktifkan sementara) ...
+        unset($_SESSION['doran_survey_answers'], $_SESSION['doran_customer_data']);
+    }
+}
+
+// ... (Sisa fungsi-fungsi lain dibungkus dalam if !function_exists juga) ...
